@@ -37,7 +37,7 @@ module axil_crossbar_rd
     begin
         grant_cdr = '0;
 
-        for (int i = 0; i < NUMBER_MASTER-1; i++) 
+        for (int i = 0; i < NUMBER_MASTER; i++) 
         begin
             if (grant_rd[i]) 
             begin

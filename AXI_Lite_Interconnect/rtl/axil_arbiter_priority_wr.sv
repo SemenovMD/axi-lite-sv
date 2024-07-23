@@ -8,7 +8,7 @@ module axil_arbiter_priority_wr
     input   logic                                   aresetn,
 
     input   logic   [NUMBER_MASTER-1:0]             request_wr,
-    output  logic   [$clog2(NUMBER_MASTER)-1:0]     grant_wr,
+    output  logic   [NUMBER_MASTER-1:0]             grant_wr,
 
     input   logic                                   s_axil_bvalid,
     input   logic   [NUMBER_MASTER-1:0]             m_axil_bready
@@ -72,7 +72,7 @@ module axil_arbiter_priority_wr
         begin
             if (request_wr[i]) 
             begin
-                next_grant = i;
+                next_grant[i] = 1;
                 break;
             end
         end
