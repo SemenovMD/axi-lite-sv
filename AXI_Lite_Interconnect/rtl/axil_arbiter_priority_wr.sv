@@ -9,12 +9,14 @@ module axil_arbiter_priority_wr
 
     input   logic   [NUMBER_MASTER-1:0]             request_wr,
     output  logic   [NUMBER_MASTER-1:0]             grant_wr,
+    output  logic   [$clog2(NUMBER_MASTER)-1:0]     grant_wr_cdr,
 
     input   logic                                   s_axil_bvalid,
     input   logic   [NUMBER_MASTER-1:0]             m_axil_bready
 );
 
-    logic [$clog2(NUMBER_MASTER)-1:0] next_grant;
+    logic           [NUMBER_MASTER-1:0]             next_grant;
+    logic           [$clog2(NUMBER_MASTER)-1:0]     next_grant_cdr;
 
     typedef enum logic [1:0]
     {  
@@ -25,12 +27,13 @@ module axil_arbiter_priority_wr
 
     state_type state_arb;
 
-    always_ff @(posedge aclk) 
+    always_ff @(posedge aclk)
     begin
         if (!aresetn)
         begin
             state_arb <= IDLE;
             grant_wr <= '0;
+            grant_wr_cdr <= '0;
         end else
         begin
             case (state_arb)
@@ -48,6 +51,7 @@ module axil_arbiter_priority_wr
                     begin
                         state_arb <= ACKN;
                         grant_wr <= next_grant;
+                        grant_wr_cdr <= next_grant_cdr;
                     end
                 ACKN:
                     begin
@@ -58,6 +62,7 @@ module axil_arbiter_priority_wr
                         begin
                             state_arb <= IDLE;
                             grant_wr <= '0;
+                            grant_wr_cdr <= '0;
                         end
                     end
             endcase
@@ -73,6 +78,20 @@ module axil_arbiter_priority_wr
             if (request_wr[i]) 
             begin
                 next_grant[i] = 1;
+                break;
+            end
+        end
+    end
+
+    always_comb 
+    begin
+        next_grant_cdr = '0;
+
+        for (int i = 0; i < NUMBER_MASTER; i++) 
+        begin
+            if (request_wr[i]) 
+            begin
+                next_grant_cdr = i;
                 break;
             end
         end

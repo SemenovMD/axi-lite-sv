@@ -1,86 +1,50 @@
 module axil_crossbar_wr
 #(
-    parameter   NUMBER_MASTER   = 2,
+    parameter   NUMBER_MASTER   = 3,
     parameter   NUMBER_SLAVE    = 4,
     parameter   AXI_DATA_WIDTH  = 8,
     parameter   AXI_ADDR_WIDTH  = 8      
 )
-
 (
-    input   logic   [NUMBER_MASTER-1:0]             grant_wr            [NUMBER_SLAVE],
+    input   logic   [NUMBER_MASTER-1:0]            grant_wr            [NUMBER_SLAVE],
+    input   logic   [NUMBER_SLAVE-1:0]             grant_wr_trans      [NUMBER_MASTER],
+    input   logic   [$clog2(NUMBER_MASTER)-1:0]    grant_wr_cdr        [NUMBER_SLAVE],
+    input   logic   [$clog2(NUMBER_SLAVE)-1:0]     grant_wr_cdr_trans  [NUMBER_MASTER],
 
     // Channel Write Address Master
-    input   logic   [AXI_ADDR_WIDTH-1:0]            m_axil_awaddr       [NUMBER_MASTER],
-    input   logic   [NUMBER_MASTER-1:0]             m_axil_awvalid,
-    output  logic   [NUMBER_MASTER-1:0]             m_axil_awready,
+    input   logic   [AXI_ADDR_WIDTH-1:0]           m_axil_awaddr       [NUMBER_MASTER],
+    input   logic   [NUMBER_MASTER-1:0]            m_axil_awvalid,
+    output  logic   [NUMBER_MASTER-1:0]            m_axil_awready,
 
     // Channel Write Data Master
-    input   logic   [AXI_DATA_WIDTH-1:0]            m_axil_wdata        [NUMBER_MASTER],
-    input   logic   [AXI_DATA_WIDTH/8-1:0]          m_axil_wstrb        [NUMBER_MASTER],
-    input   logic   [NUMBER_MASTER-1:0]             m_axil_wvalid,
-    output  logic   [NUMBER_MASTER-1:0]             m_axil_wready,
+    input   logic   [AXI_DATA_WIDTH-1:0]           m_axil_wdata        [NUMBER_MASTER],
+    input   logic   [AXI_DATA_WIDTH/8-1:0]         m_axil_wstrb        [NUMBER_MASTER],
+    input   logic   [NUMBER_MASTER-1:0]            m_axil_wvalid,
+    output  logic   [NUMBER_MASTER-1:0]            m_axil_wready,
 
     // Channel Write Response Master
-    output  logic   [1:0]                           m_axil_bresp        [NUMBER_MASTER],
-    output  logic   [NUMBER_MASTER-1:0]             m_axil_bvalid,
-    input   logic   [NUMBER_MASTER-1:0]             m_axil_bready,
+    output  logic   [1:0]                          m_axil_bresp        [NUMBER_MASTER],
+    output  logic   [NUMBER_MASTER-1:0]            m_axil_bvalid,
+    input   logic   [NUMBER_MASTER-1:0]            m_axil_bready,
 
     // Channel Write Address Slave
-    output  logic   [AXI_ADDR_WIDTH-1:0]            s_axil_awaddr       [NUMBER_SLAVE],
-    output  logic   [NUMBER_SLAVE-1:0]              s_axil_awvalid,
-    input   logic   [NUMBER_SLAVE-1:0]              s_axil_awready,
+    output  logic   [AXI_ADDR_WIDTH-1:0]           s_axil_awaddr       [NUMBER_SLAVE],
+    output  logic   [NUMBER_SLAVE-1:0]             s_axil_awvalid,
+    input   logic   [NUMBER_SLAVE-1:0]             s_axil_awready,
 
     // Channel Write Data Slave
-    output  logic   [AXI_DATA_WIDTH-1:0]            s_axil_wdata        [NUMBER_SLAVE],
-    output  logic   [AXI_DATA_WIDTH/8-1:0]          s_axil_wstrb        [NUMBER_SLAVE],
-    output  logic   [NUMBER_SLAVE-1:0]              s_axil_wvalid,
-    input   logic   [NUMBER_SLAVE-1:0]              s_axil_wready,
+    output  logic   [AXI_DATA_WIDTH-1:0]           s_axil_wdata        [NUMBER_SLAVE],
+    output  logic   [AXI_DATA_WIDTH/8-1:0]         s_axil_wstrb        [NUMBER_SLAVE],
+    output  logic   [NUMBER_SLAVE-1:0]             s_axil_wvalid,
+    input   logic   [NUMBER_SLAVE-1:0]             s_axil_wready,
 
     // Channel Write Response Slave
-    input   logic   [1:0]                           s_axil_bresp        [NUMBER_SLAVE],
-    input   logic   [NUMBER_SLAVE-1:0]              s_axil_bvalid,
-    output  logic   [NUMBER_SLAVE-1:0]              s_axil_bready
+    input   logic   [1:0]                          s_axil_bresp        [NUMBER_SLAVE],
+    input   logic   [NUMBER_SLAVE-1:0]             s_axil_bvalid,
+    output  logic   [NUMBER_SLAVE-1:0]             s_axil_bready
 );
 
-    logic   [NUMBER_SLAVE-1:0]                      grant_wr_trans      [NUMBER_MASTER];
-
-    logic   [$clog2(NUMBER_MASTER)-1:0]             grant_wr_cdr        [NUMBER_SLAVE];
-    logic   [$clog2(NUMBER_SLAVE)-1:0]              grant_wr_cdr_trans  [NUMBER_MASTER];
-
-    genvar i, j;
-
-    generate
-        for (i = 0; i < NUMBER_SLAVE; i++) begin : gen_grant_wr_cdr
-            always_comb 
-            begin
-                grant_wr_cdr[i] = '0;
-                
-                for (int k = 0; k < NUMBER_MASTER; k++) 
-                begin
-                    if (grant_wr[i][k]) begin
-                        grant_wr_cdr[i] = k;
-                        break;
-                    end
-                end
-            end
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : gen_master_1
-            for (j = 0; j < NUMBER_SLAVE; j++) begin : gen_slave_1
-                assign grant_wr_trans[j][i] = grant_wr[i][j];
-            end
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : gen_master_2
-            for (j = 0; j < NUMBER_SLAVE; j++) begin : gen_slave_2
-                assign grant_wr_cdr_trans[j][i] = grant_wr_cdr[i][j];
-            end
-        end
-    endgenerate
+    genvar i;
 
     // Generate logic for each slave
     generate
