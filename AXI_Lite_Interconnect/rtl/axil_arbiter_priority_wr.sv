@@ -55,7 +55,7 @@ module axil_arbiter_priority_wr
                     end
                 ACKN:
                     begin
-                        if (!(s_axil_bvalid && m_axil_bready[grant_wr]))
+                        if (!(s_axil_bvalid && m_axil_bready[grant_wr_cdr]))
                         begin
                             state_arb <= ACKN;
                         end else

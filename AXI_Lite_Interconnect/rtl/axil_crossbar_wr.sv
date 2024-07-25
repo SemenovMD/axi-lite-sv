@@ -1,9 +1,9 @@
 module axil_crossbar_wr
 #(
-    parameter   NUMBER_MASTER   = 3,
+    parameter   NUMBER_MASTER   = 2,
     parameter   NUMBER_SLAVE    = 4,
-    parameter   AXI_DATA_WIDTH  = 8,
-    parameter   AXI_ADDR_WIDTH  = 8      
+    parameter   AXI_DATA_WIDTH  = 32,
+    parameter   AXI_ADDR_WIDTH  = 32      
 )
 (
     input   logic   [NUMBER_MASTER-1:0]            grant_wr            [NUMBER_SLAVE],

@@ -9,13 +9,16 @@ module axil_decoder_addr_wr
 (
     input   logic   [AXI_ADDR_WIDTH-1:0]    addr,
     output  logic   [NUMBER_SLAVE-1:0]      slv_select,
-    output  logic                           addr_illegal
+    output  logic                           addr_illegal,
+
+    input   logic                           m_axil_awvalid,
+    input   logic                           m_axil_wvalid
 );
     genvar i;
 
     generate
         for (i = 0; i < NUMBER_SLAVE; i++) begin : addr_region_range
-            assign slv_select[i] = (addr >=  AXI_ADDR_OFFSET[i]) && (addr <  (AXI_ADDR_OFFSET[i] + AXI_ADDR_RANGE[i]));
+            assign slv_select[i] = m_axil_awvalid && m_axil_wvalid && (addr >=  AXI_ADDR_OFFSET[i]) && (addr <  (AXI_ADDR_OFFSET[i] + AXI_ADDR_RANGE[i]));
         end
     endgenerate
 
