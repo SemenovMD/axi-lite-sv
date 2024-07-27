@@ -1,6 +1,6 @@
 module axil_arbiter_priority_wr
 #(
-    parameter   NUMBER_MASTER   =   2
+    parameter   NUMBER_MASTER   =   4
 )
 
 (
@@ -18,10 +18,9 @@ module axil_arbiter_priority_wr
     logic           [NUMBER_MASTER-1:0]             next_grant;
     logic           [$clog2(NUMBER_MASTER)-1:0]     next_grant_cdr;
 
-    typedef enum logic [1:0]
+    typedef enum logic
     {  
         IDLE,
-        GRANT,
         ACKN
     } state_type;
 
@@ -44,14 +43,10 @@ module axil_arbiter_priority_wr
                             state_arb <= IDLE;
                         end else
                         begin
-                            state_arb <= GRANT;
+                            state_arb <= ACKN;
+                            grant_wr <= next_grant;
+                            grant_wr_cdr <= next_grant_cdr;
                         end
-                    end
-                GRANT:
-                    begin
-                        state_arb <= ACKN;
-                        grant_wr <= next_grant;
-                        grant_wr_cdr <= next_grant_cdr;
                     end
                 ACKN:
                     begin
@@ -89,10 +84,9 @@ module axil_arbiter_priority_wr
 
         for (int i = 0; i < NUMBER_MASTER; i++) 
         begin
-            if (request_wr[i]) 
+            if (next_grant[i]) 
             begin
                 next_grant_cdr = i;
-                break;
             end
         end
     end

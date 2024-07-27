@@ -81,32 +81,34 @@ module axil_interconnect_tb;
         endfunction
 
         task run();
-            repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
+            forever
+            begin
+                repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
+                
+                @(posedge aclk);
+                m_axil_awaddr[master_id] = AXI_ADDR_OFFSET[$urandom_range(0, NUMBER_SLAVE-1)];
+                m_axil_awvalid[master_id] = 1;
+                
+                m_axil_wdata[master_id] = $random;
+                m_axil_wstrb[master_id] = 4'b1111;
+                m_axil_wvalid[master_id] = 1;
 
-            m_axil_awaddr[master_id] = 32'h1000_0FF0;
-            m_axil_awvalid[master_id] = 1;
-            
-            m_axil_wdata[master_id] = $random;
-            m_axil_wstrb[master_id] = 4'b1111;
-            m_axil_wvalid[master_id] = 1;
+                wait(m_axil_awready[master_id] && m_axil_wready[master_id]);
 
-            wait(m_axil_awready[master_id] && m_axil_wready[master_id]);
+                @(posedge aclk);
+                m_axil_awaddr[master_id] = '0;
+                m_axil_awvalid[master_id] = 0;
 
-            @(posedge aclk);
-            m_axil_awaddr[master_id] = '0;
-            m_axil_awvalid[master_id] = 0;
+                m_axil_wdata[master_id] = '0;
+                m_axil_wstrb[master_id] = '0;
+                m_axil_wvalid[master_id] = 0;
+                m_axil_bready[master_id] = 1;
 
-            m_axil_wdata[master_id] = '0;
-            m_axil_wstrb[master_id] = '0;
-            m_axil_wvalid[master_id] = 0;
+                wait(m_axil_bvalid[master_id]);
 
-            wait(m_axil_bvalid[master_id]);
-
-            @(posedge aclk);
-            m_axil_bready[master_id] = 1;
-
-            @(posedge aclk);
-            m_axil_bready[master_id] = 0;
+                @(posedge aclk);
+                m_axil_bready[master_id] = 0;
+            end
         endtask
     endclass
 
@@ -117,27 +119,29 @@ module axil_interconnect_tb;
         endfunction
 
         task run();
-            //repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
+            forever
+            begin
+                repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
+                
+                @(posedge aclk);
+                wait(s_axil_awvalid[slave_id] && s_axil_wvalid[slave_id]);
 
-            wait(s_axil_awvalid[slave_id] && s_axil_wvalid[slave_id]);
+                @(posedge aclk);
+                s_axil_awready[slave_id] = 1;
+                s_axil_wready[slave_id] = 1;
 
-            @(posedge aclk);
-            s_axil_awready[slave_id] = 1;
-            s_axil_wready[slave_id] = 1;
+                @(posedge aclk);
+                s_axil_awready[slave_id] = 0;
+                s_axil_wready[slave_id] = 0;
+                s_axil_bvalid[slave_id] = 1;
+                s_axil_bresp[slave_id] = 2'b00;
+ 
+                wait(s_axil_bready[slave_id]); 
 
-            @(posedge aclk);
-            s_axil_awready[slave_id] = 0;
-            s_axil_wready[slave_id] = 0;
-
-            @(posedge aclk);
-            s_axil_bvalid[slave_id] = 1;
-            s_axil_bresp[slave_id] = 2'b00;
-            
-            wait(s_axil_bready[slave_id]);
-
-            @(posedge aclk);
-            s_axil_bvalid[slave_id] = 0;
-            s_axil_bresp[slave_id] = 2'b00;
+                @(posedge aclk);
+                s_axil_bvalid[slave_id] = 0;
+                s_axil_bresp[slave_id] = 2'b00;
+            end
         endtask
     endclass
 
@@ -180,24 +184,19 @@ module axil_interconnect_tb;
         Master master0 = new(0);
         Master master1 = new(1);
         Slave slave0 = new(0);
+        Slave slave1 = new(1);
+        Slave slave2 = new(2);
+        Slave slave3 = new(3);
 
         #100;
 
         fork
-            forever
-            begin
-                master0.run();
-            end
-
-            forever
-            begin
-                master1.run();
-            end
-
-            forever
-            begin
-                slave0.run();
-            end
+            master0.run();
+            master1.run();
+            slave0.run();
+            slave1.run();
+            slave2.run();
+            slave3.run();
         join
 
         $finish;

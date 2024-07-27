@@ -1,8 +1,8 @@
 module axil_interconnect_wrapper
 #(
-    parameter                               NUMBER_MASTER                   = 2,
+    parameter                               NUMBER_MASTER                   = 4,
     parameter                               NUMBER_SLAVE                    = 4,
-    parameter                               AXI_DATA_WIDTH                  = 32,   
+    parameter                               AXI_DATA_WIDTH                  = 32,
     parameter                               AXI_ADDR_WIDTH                  = 32,
     parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_OFFSET [NUMBER_SLAVE]  = '{32'h1000_0000, 32'h2000_0000, 32'h3000_0000, 32'h4000_0000},
     parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_RANGE  [NUMBER_SLAVE]  = '{32'h0000_FFFF, 32'h0000_FFFF, 32'h0000_FFFF, 32'h0000_FFFF}
@@ -42,9 +42,7 @@ module axil_interconnect_wrapper
     // Channel Write Response Slave
     input   logic   [1:0]                       s_axil_bresp            [NUMBER_SLAVE],
     input   logic   [NUMBER_SLAVE-1:0]          s_axil_bvalid,
-    output  logic   [NUMBER_SLAVE-1:0]          s_axil_bready,
-
-    output  logic   [NUMBER_MASTER-1:0]         addr_illegal
+    output  logic   [NUMBER_SLAVE-1:0]          s_axil_bready
 );
 
     axil_interconnect #

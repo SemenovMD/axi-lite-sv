@@ -23,7 +23,13 @@ add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapp
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/aresetn
 
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[0]/axil_arbiter_priority_wr_inst/grant_wr
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[1]/axil_arbiter_priority_wr_inst/grant_wr
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[2]/axil_arbiter_priority_wr_inst/grant_wr
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[3]/axil_arbiter_priority_wr_inst/grant_wr
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[0]/axil_arbiter_priority_wr_inst/state_arb
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[1]/axil_arbiter_priority_wr_inst/state_arb
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[2]/axil_arbiter_priority_wr_inst/state_arb
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_arbiter_priority_wr[3]/axil_arbiter_priority_wr_inst/state_arb
 
 add wave -radix hexadecimal         axil_interconnect_tb/axil_interconnect_wrapper_inst/m_axil_awaddr[0]
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/m_axil_awvalid[0]
@@ -107,7 +113,7 @@ add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapp
 
 
 # Run the simulation for the specified time
-run 10ms
+run 1ms
 
 # Zoom out to show all waveform data
 wave zoom full

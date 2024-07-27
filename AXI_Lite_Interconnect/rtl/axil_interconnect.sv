@@ -42,9 +42,7 @@ module axil_interconnect
     // Channel Write Response Slave
     input   logic   [1:0]                       s_axil_bresp            [NUMBER_SLAVE],
     input   logic   [NUMBER_SLAVE-1:0]          s_axil_bvalid,
-    output  logic   [NUMBER_SLAVE-1:0]          s_axil_bready,
-
-    output  logic   [NUMBER_MASTER-1:0]         addr_illegal
+    output  logic   [NUMBER_SLAVE-1:0]          s_axil_bready
 );
 
     logic   [NUMBER_SLAVE-1:0]                  slv_select_wire         [NUMBER_MASTER];
@@ -72,7 +70,7 @@ module axil_interconnect
             (
                 .addr(m_axil_awaddr[i]),
                 .slv_select(slv_select_wire[i]),
-                .addr_illegal(addr_illegal[i]),
+                //.addr_illegal(addr_illegal[i]),
                 .m_axil_awvalid(m_axil_awvalid[i]),
                 .m_axil_wvalid(m_axil_wvalid[i])
             );
