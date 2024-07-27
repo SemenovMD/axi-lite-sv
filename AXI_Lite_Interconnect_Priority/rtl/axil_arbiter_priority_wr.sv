@@ -1,6 +1,6 @@
 module axil_arbiter_priority_wr
 #(
-    parameter   NUMBER_MASTER   =   4
+    parameter   NUMBER_MASTER   =   20
 )
 
 (
@@ -9,11 +9,12 @@ module axil_arbiter_priority_wr
 
     input   logic   [NUMBER_MASTER-1:0]             request_wr,
     output  logic   [NUMBER_MASTER-1:0]             grant_wr,
-    output  logic   [$clog2(NUMBER_MASTER)-1:0]     grant_wr_cdr,
 
     input   logic                                   s_axil_bvalid,
     input   logic   [NUMBER_MASTER-1:0]             m_axil_bready
 );
+
+    logic           [$clog2(NUMBER_MASTER)-1:0]     grant_wr_cdr;
 
     logic           [NUMBER_MASTER-1:0]             next_grant;
     logic           [$clog2(NUMBER_MASTER)-1:0]     next_grant_cdr;

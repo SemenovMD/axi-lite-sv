@@ -1,6 +1,6 @@
 module axil_arbiter_priority_rd
 #(
-    parameter   NUMBER_MASTER   =   2
+    parameter   NUMBER_MASTER   =   20
 )
 
 (
@@ -8,29 +8,32 @@ module axil_arbiter_priority_rd
     input   logic                                   aresetn,
 
     input   logic   [NUMBER_MASTER-1:0]             request_rd,
-    output  logic   [$clog2(NUMBER_MASTER)-1:0]     grant_rd,
+    output  logic   [NUMBER_MASTER-1:0]             grant_rd,
 
-    input   logic                                   s_axil_bvalid,
-    input   logic   [NUMBER_MASTER-1:0]             m_axil_bready
+    input   logic                                   s_axil_rvalid,
+    input   logic   [NUMBER_MASTER-1:0]             m_axil_rready
 );
 
-    logic [$clog2(NUMBER_MASTER)-1:0] next_grant;
+    logic           [$clog2(NUMBER_MASTER)-1:0]     grant_rd_cdr;
 
-    typedef enum logic [1:0]
+    logic           [NUMBER_MASTER-1:0]             next_grant;
+    logic           [$clog2(NUMBER_MASTER)-1:0]     next_grant_cdr;
+
+    typedef enum logic
     {  
         IDLE,
-        GRANT,
         ACKN
     } state_type;
 
     state_type state_arb;
 
-    always_ff @(posedge aclk) 
+    always_ff @(posedge aclk)
     begin
         if (!aresetn)
         begin
             state_arb <= IDLE;
             grant_rd <= '0;
+            grant_rd_cdr <= '0;
         end else
         begin
             case (state_arb)
@@ -41,23 +44,21 @@ module axil_arbiter_priority_rd
                             state_arb <= IDLE;
                         end else
                         begin
-                            state_arb <= GRANT;
+                            state_arb <= ACKN;
+                            grant_rd <= next_grant;
+                            grant_rd_cdr <= next_grant_cdr;
                         end
-                    end
-                GRANT:
-                    begin
-                        state_arb <= ACKN;
-                        grant_rd <= next_grant;
                     end
                 ACKN:
                     begin
-                        if (!(s_axil_bvalid && m_axil_bready[grant_rd]))
+                        if (!(s_axil_rvalid && m_axil_rready[grant_rd_cdr]))
                         begin
                             state_arb <= ACKN;
                         end else
                         begin
                             state_arb <= IDLE;
                             grant_rd <= '0;
+                            grant_rd_cdr <= '0;
                         end
                     end
             endcase
@@ -72,8 +73,21 @@ module axil_arbiter_priority_rd
         begin
             if (request_rd[i]) 
             begin
-                next_grant = i;
+                next_grant[i] = 1;
                 break;
+            end
+        end
+    end
+
+    always_comb 
+    begin
+        next_grant_cdr = '0;
+
+        for (int i = 0; i < NUMBER_MASTER; i++) 
+        begin
+            if (next_grant[i]) 
+            begin
+                next_grant_cdr = i;
             end
         end
     end
