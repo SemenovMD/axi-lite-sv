@@ -9,6 +9,8 @@ vlog -sv tb/pkg_tb.sv
 
 # Compile the design and testbench
 vlog -sv rtl/axil_decoder_addr_wr.sv
+vlog -sv rtl/axil_mux_wr.sv
+vlog -sv rtl/axil_response_addr_invalid_wr.sv
 vlog -sv rtl/axil_arbiter_priority_wr.sv
 vlog -sv rtl/axil_crossbar_ms_wr.sv
 vlog -sv rtl/axil_crossbar_sm_wr.sv
@@ -28,11 +30,12 @@ set NUMBER_SLAVE    16
 vsim -t 1ns -L altera_mf_ver -voptargs="+acc" axil_interconnect_tb
 
 # Add signals to the waveform window
-add wave -radix binary                  axil_interconnect_tb/axil_interconnect_wrapper_inst/aclk
-add wave -radix binary                  axil_interconnect_tb/axil_interconnect_wrapper_inst/aresetn
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/aclk
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/aresetn
 
 # Loop to add master write signals
 for {set i 0} {$i < $NUMBER_MASTER} {incr i} {
+    add wave -radix binary          axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_response_addr_invalid_wr[$i]/axil_response_addr_invalid_wr/slv_invalid
 	add wave -radix hexadecimal 	axil_interconnect_tb/axil_interconnect_wrapper_inst/m_axil_awaddr[$i]
     add wave -radix binary 		    axil_interconnect_tb/axil_interconnect_wrapper_inst/m_axil_awvalid[$i]
     add wave -radix binary 		    axil_interconnect_tb/axil_interconnect_wrapper_inst/m_axil_awready[$i]

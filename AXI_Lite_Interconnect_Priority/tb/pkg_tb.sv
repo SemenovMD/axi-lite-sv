@@ -22,22 +22,22 @@ package pkg_tb;
                                                                                 32'hE000_0000, 
                                                                                 32'hF000_0000};
 
-    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_RANGE  [NUMBER_SLAVE]  = '{32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF,
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF,
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF, 
-                                                                                32'h0FFF_FFFF,
-                                                                                32'h0FFF_FFFF,
-                                                                                32'h0FFF_FFFF,
-                                                                                32'h0FFF_FFFF,
-                                                                                32'h0FFF_FFFF};
+    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_RANGE  [NUMBER_SLAVE]  = '{32'h0000_FFFF, 
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF,
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF,
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF, 
+                                                                                32'h0000_FFFF,
+                                                                                32'h0000_FFFF,
+                                                                                32'h0000_FFFF,
+                                                                                32'h0000_FFFF,
+                                                                                32'h0000_FFFF};
 
     parameter AXI_TRAN_MIN_DELAY = 2;
     parameter AXI_TRAN_MAX_DELAY = 17;

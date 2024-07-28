@@ -16,34 +16,42 @@ module axil_interconnect_wrapper
     input   logic                               aclk,
     input   logic                               aresetn,
 
-    // Channel Write Address Master
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Channel WRITE Master
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Channel Write Address
     input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_awaddr           [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]         m_axil_awvalid,
     output  logic   [NUMBER_MASTER-1:0]         m_axil_awready,
 
-    // Channel Write Data Master
+    // Channel Write Data
     input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_wdata            [NUMBER_MASTER],
     input   logic   [AXI_DATA_WIDTH/8-1:0]      m_axil_wstrb            [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]         m_axil_wvalid,
     output  logic   [NUMBER_MASTER-1:0]         m_axil_wready,
 
-    // Channel Write Response Master
+    // Channel Write Response
     output  logic   [1:0]                       m_axil_bresp            [NUMBER_MASTER],
     output  logic   [NUMBER_MASTER-1:0]         m_axil_bvalid,
     input   logic   [NUMBER_MASTER-1:0]         m_axil_bready,
 
-    // Channel Write Address Slave
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Channel WRITE Slave
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Channel Write Address
     output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_awaddr           [NUMBER_SLAVE],
     output  logic   [NUMBER_SLAVE-1:0]          s_axil_awvalid,
     input   logic   [NUMBER_SLAVE-1:0]          s_axil_awready,
 
-    // Channel Write Data Slave
+    // Channel Write Data
     output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_wdata            [NUMBER_SLAVE],
     output  logic   [AXI_DATA_WIDTH/8-1:0]      s_axil_wstrb            [NUMBER_SLAVE],
     output  logic   [NUMBER_SLAVE-1:0]          s_axil_wvalid,
     input   logic   [NUMBER_SLAVE-1:0]          s_axil_wready,
 
-    // Channel Write Response Slave
+    // Channel Write Response
     input   logic   [1:0]                       s_axil_bresp            [NUMBER_SLAVE],
     input   logic   [NUMBER_SLAVE-1:0]          s_axil_bvalid,
     output  logic   [NUMBER_SLAVE-1:0]          s_axil_bready,

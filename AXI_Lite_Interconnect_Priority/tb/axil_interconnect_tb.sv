@@ -253,7 +253,7 @@ module axil_interconnect_tb;
     initial 
     begin
         aresetn = 0;
-        #15 aresetn = 1; 
+        #100 aresetn = 1; 
     end
 
     initial begin
