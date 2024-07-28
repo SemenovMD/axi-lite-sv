@@ -4,11 +4,11 @@ module axil_interconnect_tb;
 
     import pkg_tb::*;
     
-    // Сигналы
+    // Globals Signals
     logic                               aclk;
     logic                               aresetn;
 
-    // Сигналы для каналов мастеров записи
+    // Signals for master write channels
     logic [AXI_ADDR_WIDTH-1:0]          m_axil_awaddr           [NUMBER_MASTER];
     logic [NUMBER_MASTER-1:0]           m_axil_awvalid;
     logic [NUMBER_MASTER-1:0]           m_axil_awready;
@@ -22,7 +22,7 @@ module axil_interconnect_tb;
     logic [NUMBER_MASTER-1:0]           m_axil_bvalid;
     logic [NUMBER_MASTER-1:0]           m_axil_bready;
 
-    // Сигналы для каналов слейвов записи
+    // Signals for slave write channels
     logic [AXI_ADDR_WIDTH-1:0]          s_axil_awaddr           [NUMBER_SLAVE];
     logic [NUMBER_SLAVE-1:0]            s_axil_awvalid;
     logic [NUMBER_SLAVE-1:0]            s_axil_awready;
@@ -36,7 +36,7 @@ module axil_interconnect_tb;
     logic [NUMBER_SLAVE-1:0]            s_axil_bvalid;
     logic [NUMBER_SLAVE-1:0]            s_axil_bready;
 
-    // Сигналы для каналов мастеров чтения
+    // Signals for master read channels
     logic   [AXI_ADDR_WIDTH-1:0]        m_axil_araddr           [NUMBER_MASTER];
     logic   [NUMBER_MASTER-1:0]         m_axil_arvalid;
     logic   [NUMBER_MASTER-1:0]         m_axil_arready;
@@ -46,7 +46,7 @@ module axil_interconnect_tb;
     logic   [NUMBER_MASTER-1:0]         m_axil_rvalid;
     logic   [NUMBER_MASTER-1:0]         m_axil_rready;
 
-    // Сигналы для каналов слейвов чтения
+    // Signals for slave read channels
     logic   [AXI_ADDR_WIDTH-1:0]        s_axil_araddr           [NUMBER_SLAVE];
     logic   [NUMBER_SLAVE-1:0]          s_axil_arvalid;
     logic   [NUMBER_SLAVE-1:0]          s_axil_arready;

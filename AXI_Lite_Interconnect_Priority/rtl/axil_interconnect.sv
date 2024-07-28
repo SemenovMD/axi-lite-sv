@@ -150,7 +150,7 @@ module axil_interconnect
 
     logic   [NUMBER_MASTER-1:0]                 m_axil_rready_wire      [NUMBER_SLAVE];
 
-    logic   [NUMBER_MASTER-1:0]                  slv_invalid_rd;
+    logic   [NUMBER_MASTER-1:0]                 slv_invalid_rd;
 
     // Channel Read Address
     logic   [AXI_ADDR_WIDTH-1:0]                m_axil_araddr_1         [NUMBER_MASTER];
@@ -179,8 +179,8 @@ module axil_interconnect
     ////////////////////////////////////////////////////////////////////////////////////////////////  
 
     generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : gen_tr_1
-            for (j = 0; j < NUMBER_SLAVE; j++) begin : gen_tr_2
+        for (i = 0; i < NUMBER_MASTER; i++) begin : trans_master_wr
+            for (j = 0; j < NUMBER_SLAVE; j++) begin : trans_slave_wr
                 assign slv_select_wire_tr[j][i] = slv_select_wire[i][j];
                 assign m_axil_bready_wire[j][i] = m_axil_bready[i];
                 assign grant_wr_wire_tr[i][j]   = grant_wr_wire[j][i];
@@ -196,7 +196,9 @@ module axil_interconnect
                 .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
                 .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
             ) 
+            
             axil_decoder_addr_wr_inst
+            
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -217,7 +219,9 @@ module axil_interconnect
                 .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                 .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
             )
+
             axil_mux_wr_inst
+            
             (
                 .slv_invalid(slv_invalid_wr[i]),
                 .m_axil_awaddr_0(m_axil_awaddr[i]),
@@ -260,7 +264,9 @@ module axil_interconnect
                 .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                 .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
             )
-            axil_response_addr_invalid_wr 
+
+            axil_response_addr_invalid_wr_inst
+            
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -284,7 +290,9 @@ module axil_interconnect
             axil_arbiter_priority_wr #(
                 .NUMBER_MASTER(NUMBER_MASTER)
             )
+
             axil_arbiter_priority_wr_inst
+            
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -298,9 +306,7 @@ module axil_interconnect
 
     generate
         for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_crossbar_ms_wr
-            axil_crossbar_ms_wr #
-
-            (
+            axil_crossbar_ms_wr #(
                 .NUMBER_MASTER(NUMBER_MASTER),
                 .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                 .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
@@ -328,9 +334,7 @@ module axil_interconnect
 
     generate
         for (i = 0; i < NUMBER_MASTER; i++) begin : axil_crossbar_sm_wr
-            axil_crossbar_sm_wr #
-
-            (
+            axil_crossbar_sm_wr #(
                 .NUMBER_SLAVE(NUMBER_SLAVE),
                 .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                 .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
@@ -357,8 +361,8 @@ module axil_interconnect
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : gen_rd_1
-            for (j = 0; j < NUMBER_SLAVE; j++) begin : gen_rd_2
+        for (i = 0; i < NUMBER_MASTER; i++) begin : trans_master_rd
+            for (j = 0; j < NUMBER_SLAVE; j++) begin : trans_slave_rd
                 assign slv_select_wire_rd_tr[j][i] = slv_select_wire_rd[i][j];
                 assign m_axil_rready_wire[j][i] = m_axil_rready[i];
                 assign grant_rd_wire_tr[i][j]   = grant_rd_wire[j][i];
@@ -374,7 +378,9 @@ module axil_interconnect
                 .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
                 .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
             ) 
+
             axil_decoder_addr_rd_inst
+            
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -394,7 +400,9 @@ module axil_interconnect
                 .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                 .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
             )
+
             axil_mux_rd_inst
+            
             (
                 .slv_invalid(slv_invalid_rd[i]),
                 .m_axil_araddr_0(m_axil_araddr[i]),
@@ -428,7 +436,9 @@ module axil_interconnect
                 .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
                 .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
             )
-            axil_response_addr_invalid_wr 
+
+            axil_response_addr_invalid_wr_inst
+            
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
