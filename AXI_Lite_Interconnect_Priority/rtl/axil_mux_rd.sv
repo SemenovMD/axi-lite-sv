@@ -1,4 +1,4 @@
-module axil_mux_wr
+module axil_mux_rd
 #(
     parameter   AXI_DATA_WIDTH  =   32,
     parameter   AXI_ADDR_WIDTH  =   32

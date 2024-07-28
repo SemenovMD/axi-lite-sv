@@ -150,7 +150,29 @@ module axil_interconnect
 
     logic   [NUMBER_MASTER-1:0]                 m_axil_rready_wire      [NUMBER_SLAVE];
 
-    logic   [NUMBER_SLAVE-1:0]                  slv_invalid_rd;
+    logic   [NUMBER_MASTER-1:0]                  slv_invalid_rd;
+
+    // Channel Read Address
+    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_araddr_1         [NUMBER_MASTER];
+    logic   [NUMBER_MASTER-1:0]                 m_axil_arvalid_1;
+    logic   [NUMBER_MASTER-1:0]                 m_axil_arready_1;
+
+    // Channel Read Data
+    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_rdata_1          [NUMBER_MASTER];
+    logic   [1:0]                               m_axil_rresp_1          [NUMBER_MASTER];
+    logic   [NUMBER_MASTER-1:0]                 m_axil_rvalid_1;
+    logic   [NUMBER_MASTER-1:0]                 m_axil_rready_1;
+
+    // Channel Read Address
+    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_araddr_2         [NUMBER_MASTER];
+    logic   [NUMBER_MASTER-1:0]                 m_axil_arvalid_2;
+    logic   [NUMBER_MASTER-1:0]                 m_axil_arready_2;
+
+    // Channel Read Data
+    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_rdata_2          [NUMBER_MASTER];
+    logic   [1:0]                               m_axil_rresp_2          [NUMBER_MASTER];
+    logic   [NUMBER_MASTER-1:0]                 m_axil_rvalid_2;
+    logic   [NUMBER_MASTER-1:0]                 m_axil_rready_2;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Channel WRITE
@@ -182,9 +204,9 @@ module axil_interconnect
                 .slv_valid(slv_select_wire[i]),
                 .slv_invalid(slv_invalid_wr[i]),
                 .m_axil_awvalid(m_axil_awvalid[i]),
-                .m_axil_wvalid(m_axil_wvalid[i])
-                //.m_axil_bvalid(m_axil_bvalid[i]),
-                //.m_axil_bready(m_axil_bready[i])
+                .m_axil_wvalid(m_axil_wvalid[i]),
+                .m_axil_bvalid(m_axil_bvalid[i]),
+                .m_axil_bready(m_axil_bready[i])
             );
         end
     endgenerate
@@ -354,10 +376,70 @@ module axil_interconnect
             ) 
             axil_decoder_addr_rd_inst
             (
+                .aclk(aclk),
+                .aresetn(aresetn),
                 .addr(m_axil_araddr[i]),
                 .slv_valid(slv_select_wire_rd[i]),
                 .slv_invalid(slv_invalid_rd[i]),
-                .m_axil_arvalid(m_axil_arvalid[i])
+                .m_axil_arvalid(m_axil_arvalid[i]),
+                .m_axil_rvalid(m_axil_rvalid[i]),
+                .m_axil_rready(m_axil_rready[i])
+            );
+        end
+    endgenerate
+
+    generate
+        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_mux_rd
+            axil_mux_rd #(
+                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
+            )
+            axil_mux_rd_inst
+            (
+                .slv_invalid(slv_invalid_rd[i]),
+                .m_axil_araddr_0(m_axil_araddr[i]),
+                .m_axil_arvalid_0(m_axil_arvalid[i]),
+                .m_axil_arready_0(m_axil_arready[i]),
+                .m_axil_rdata_0(m_axil_rdata[i]),
+                .m_axil_rresp_0(m_axil_rresp[i]),
+                .m_axil_rvalid_0(m_axil_rvalid[i]),
+                .m_axil_rready_0(m_axil_rready[i]),
+                .m_axil_araddr_1(m_axil_araddr_1[i]),
+                .m_axil_arvalid_1(m_axil_arvalid_1[i]),
+                .m_axil_arready_1(m_axil_arready_1[i]),
+                .m_axil_rdata_1(m_axil_rdata_1[i]),
+                .m_axil_rresp_1(m_axil_rresp_1[i]),
+                .m_axil_rvalid_1(m_axil_rvalid_1[i]),
+                .m_axil_rready_1(m_axil_rready_1[i]),
+                .m_axil_araddr_2(m_axil_araddr_2[i]),
+                .m_axil_arvalid_2(m_axil_arvalid_2[i]),
+                .m_axil_arready_2(m_axil_arready_2[i]),
+                .m_axil_rdata_2(m_axil_rdata_2[i]),
+                .m_axil_rresp_2(m_axil_rresp_2[i]),
+                .m_axil_rvalid_2(m_axil_rvalid_2[i]),
+                .m_axil_rready_2(m_axil_rready_2[i])
+            );
+        end
+    endgenerate
+
+    generate
+        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_response_addr_invalid_rd
+            axil_response_addr_invalid_rd #(
+                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
+            )
+            axil_response_addr_invalid_wr 
+            (
+                .aclk(aclk),
+                .aresetn(aresetn),
+                .slv_invalid(slv_invalid_rd[i]),
+                .s_axil_araddr(m_axil_araddr_2[i]),
+                .s_axil_arvalid(m_axil_arvalid_2[i]),
+                .s_axil_arready(m_axil_arready_2[i]),
+                .s_axil_rdata(m_axil_rdata_2[i]),
+                .s_axil_rresp(m_axil_rresp_2[i]),
+                .s_axil_rvalid(m_axil_rvalid_2[i]),
+                .s_axil_rready(m_axil_rready_2[i])
             );
         end
     endgenerate
@@ -393,9 +475,9 @@ module axil_interconnect
 
             (
                 .grant_rd(grant_rd_wire[i]),
-                .m_axil_araddr(m_axil_araddr),
-                .m_axil_arvalid(m_axil_arvalid),
-                .m_axil_rready(m_axil_rready),
+                .m_axil_araddr(m_axil_araddr_1),
+                .m_axil_arvalid(m_axil_arvalid_1),
+                .m_axil_rready(m_axil_rready_1),
                 .s_axil_araddr(s_axil_araddr[i]),
                 .s_axil_arvalid(s_axil_arvalid[i]),
                 .s_axil_rready(s_axil_rready[i])
@@ -417,10 +499,10 @@ module axil_interconnect
 
             (
                 .grant_rd_trans(grant_rd_wire_tr[i]),    
-                .m_axil_arready(m_axil_arready[i]),
-                .m_axil_rdata(m_axil_rdata[i]),
-                .m_axil_rresp(m_axil_rresp[i]),
-                .m_axil_rvalid(m_axil_rvalid[i]),
+                .m_axil_arready(m_axil_arready_1[i]),
+                .m_axil_rdata(m_axil_rdata_1[i]),
+                .m_axil_rresp(m_axil_rresp_1[i]),
+                .m_axil_rvalid(m_axil_rvalid_1[i]),
                 .s_axil_arready(s_axil_arready),
                 .s_axil_rdata(s_axil_rdata),
                 .s_axil_rresp(s_axil_rresp),
@@ -428,6 +510,5 @@ module axil_interconnect
             );
         end
     endgenerate
-
 
 endmodule

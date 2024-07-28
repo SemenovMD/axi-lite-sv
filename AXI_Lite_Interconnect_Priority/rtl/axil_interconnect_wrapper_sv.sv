@@ -1,7 +1,7 @@
-module axil_interconnect_wrapper
+module axil_interconnect_wrapper_sv
 #(
-    parameter                               NUMBER_MASTER                   = 20,
-    parameter                               NUMBER_SLAVE                    = 12,
+    parameter                               NUMBER_MASTER                   = 32,
+    parameter                               NUMBER_SLAVE                    = 16,
     parameter                               AXI_DATA_WIDTH                  = 32,
     parameter                               AXI_ADDR_WIDTH                  = 32,
 
@@ -133,4 +133,3 @@ module axil_interconnect_wrapper
     );
 
 endmodule
-

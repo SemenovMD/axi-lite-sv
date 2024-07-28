@@ -1,5 +1,6 @@
 module axil_response_addr_invalid_rd
 #(
+    parameter   AXI_ADDR_WIDTH  =   32,
     parameter   AXI_DATA_WIDTH  =   32
 )
 
@@ -10,6 +11,8 @@ module axil_response_addr_invalid_rd
     input   logic                                   slv_invalid,
 
     // Channel Read Address
+    input   logic   [AXI_ADDR_WIDTH-1:0]            s_axil_araddr,
+    input   logic                                   s_axil_arvalid,
     output  logic                                   s_axil_arready,
 
     // Channel Read Data
@@ -23,10 +26,10 @@ module axil_response_addr_invalid_rd
     {  
         IDLE,
         RESP,
-        ACKN
-    } state_type_rd;
+        HAND
+    } state_type_wr;
 
-    state_type_rd state_rd;
+    state_type_wr state_rd;
 
     always_ff @(posedge aclk)
     begin
@@ -42,34 +45,40 @@ module axil_response_addr_invalid_rd
             case (state_rd)
                 IDLE:
                     begin
-                        if (!slv_invalid)
+                        if (!s_axil_arvalid)
                         begin
                             state_rd <= IDLE;
                         end else
                         begin
-                            state_rd <= RESP;
-                            s_axil_arready <= 1;
+                            if (!slv_invalid)
+                            begin
+                                state_rd <= IDLE;
+                            end else
+                            begin
+                                state_rd <= RESP;
+                                s_axil_arready <= 1;
+                            end
                         end
                     end
                 RESP:
                     begin
-                        state_rd <= ACKN;
+                        state_rd <= HAND;
                         s_axil_arready <= 0;
-                        s_axil_rdata   <= '0;
-                        s_axil_rvalid  <= 1;
-                        s_axil_rresp   <= 2'b11;
+                        s_axil_rdata <= '1;
+                        s_axil_rvalid <= 1;
+                        s_axil_rresp <= 2'b11;
                     end
-                ACKN:
+                HAND:
                     begin
-                        if (!s_axil_bready)
+                        if (!s_axil_rready)
                         begin
-                            state_rd <= ACKN;
+                            state_rd <= HAND;
                         end else
                         begin
                             state_rd <= IDLE;
-                            s_axil_rdata   <= '0;
-                            s_axil_rvalid  <= 0;
-                            s_axil_rresp   <= 2'b00;
+                            s_axil_rdata <= '0;
+                            s_axil_rvalid <= 0;
+                            s_axil_rresp <= 2'b00;
                         end
                     end
             endcase

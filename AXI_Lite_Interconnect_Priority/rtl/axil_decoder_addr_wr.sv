@@ -15,7 +15,10 @@ module axil_decoder_addr_wr
     output  logic                           slv_invalid,
 
     input   logic                           m_axil_awvalid,
-    input   logic                           m_axil_wvalid
+    input   logic                           m_axil_wvalid,
+
+    input   logic                           m_axil_bvalid,
+    input   logic                           m_axil_bready
 );
 
     logic           [NUMBER_SLAVE-1:0]      slv_valid_wire;
@@ -23,24 +26,50 @@ module axil_decoder_addr_wr
 
     genvar i;
 
+    typedef enum logic 
+    {  
+        IDLE,
+        HAND
+    } state_type_dec;
+
+    state_type_dec state_dec;
+
     always_ff @(posedge aclk)
     begin
-       if (!aresetn)
-       begin
-           slv_valid <= '0;
-           slv_invalid <= 0;
-       end else
-       begin
-            if (m_axil_awvalid && m_axil_wvalid)
-            begin
-                slv_valid <= slv_valid_wire;
-                slv_invalid <= slv_invalid_wire;
-            end else
-            begin
-                slv_valid <= 0;
-                slv_invalid <= 0;
-            end
-       end
+        if (!aresetn)
+        begin
+            state_dec <= IDLE;
+            slv_valid <= '0;
+            slv_invalid <= 0;
+        end else
+        begin
+            case (state_dec)
+                IDLE:
+                    begin
+                        if (!(m_axil_awvalid && m_axil_wvalid))
+                        begin
+                            state_dec <= IDLE;
+                        end else
+                        begin
+                            state_dec <= HAND;
+                            slv_valid <= slv_valid_wire;
+                            slv_invalid <= slv_invalid_wire;
+                        end
+                    end
+                HAND:
+                    begin
+                        if (!(m_axil_bready && m_axil_bvalid))
+                        begin
+                            state_dec <= HAND; 
+                        end else
+                        begin
+                            state_dec <= IDLE;
+                            slv_valid <= 0;
+                            slv_invalid <= 0;
+                        end
+                    end
+            endcase
+        end
     end
 
     generate

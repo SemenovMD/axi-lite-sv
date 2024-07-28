@@ -14,35 +14,69 @@ module axil_decoder_addr_rd
     output  logic   [NUMBER_SLAVE-1:0]      slv_valid,
     output  logic                           slv_invalid,
 
-    input   logic                           m_axil_arvalid
+    input   logic                           m_axil_arvalid,
+
+    input   logic                           m_axil_rvalid,
+    input   logic                           m_axil_rready
 );
 
-    logic           [AXI_ADDR_WIDTH-1:0]    addr_wire;
     logic           [NUMBER_SLAVE-1:0]      slv_valid_wire;
     logic           [NUMBER_SLAVE-1:0]      slv_invalid_wire; 
 
     genvar i;
 
+    typedef enum logic 
+    {  
+        IDLE,
+        HAND
+    } state_type_dec;
+
+    state_type_dec state_dec;
+
     always_ff @(posedge aclk)
     begin
         if (!aresetn)
         begin
-            addr_wire <= '0;
+            state_dec <= IDLE;
             slv_valid <= '0;
             slv_invalid <= 0;
         end else
         begin
-            addr_wire <= addr;
-            slv_valid <= slv_valid_wire;
-            slv_invalid <= ~|slv_invalid_wire;
+            case (state_dec)
+                IDLE:
+                    begin
+                        if (!m_axil_arvalid)
+                        begin
+                            state_dec <= IDLE;
+                        end else
+                        begin
+                            state_dec <= HAND;
+                            slv_valid <= slv_valid_wire;
+                            slv_invalid <= slv_invalid_wire;
+                        end
+                    end
+                HAND:
+                    begin
+                        if (!(m_axil_rready && m_axil_rvalid))
+                        begin
+                            state_dec <= HAND; 
+                        end else
+                        begin
+                            state_dec <= IDLE;
+                            slv_valid <= 0;
+                            slv_invalid <= 0;
+                        end
+                    end
+            endcase
         end
     end
 
     generate
         for (i = 0; i < NUMBER_SLAVE; i++) begin : gen_slave
-            assign  slv_valid_wire[i]   = ((m_axil_arvalid) && ((addr_wire >= AXI_ADDR_OFFSET[i]) && (addr_wire < (AXI_ADDR_OFFSET[i] + AXI_ADDR_RANGE[i]))));
-            assign  slv_invalid_wire[i] = ((m_axil_arvalid) && ((addr_wire >= AXI_ADDR_OFFSET[i]) && (addr_wire < (AXI_ADDR_OFFSET[i] + AXI_ADDR_RANGE[i])))) ? 0 : 1;
+            assign slv_valid_wire[i] = (addr >= AXI_ADDR_OFFSET[i]) && (addr < (AXI_ADDR_OFFSET[i] + AXI_ADDR_RANGE[i]));
         end
     endgenerate
+
+    assign slv_invalid_wire = ~|slv_valid_wire;
 
 endmodule

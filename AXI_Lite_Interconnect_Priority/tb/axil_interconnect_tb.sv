@@ -56,7 +56,7 @@ module axil_interconnect_tb;
     logic   [NUMBER_SLAVE-1:0]          s_axil_rvalid;
     logic   [NUMBER_SLAVE-1:0]          s_axil_rready;
 
-    axil_interconnect_wrapper #
+    axil_interconnect_wrapper_sv #
     
     (
         .NUMBER_MASTER(NUMBER_MASTER),
@@ -67,7 +67,7 @@ module axil_interconnect_tb;
         .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
     ) 
     
-    axil_interconnect_wrapper_inst 
+    axil_interconnect_wrapper_sv_inst 
     
     (
         .aclk(aclk),
@@ -199,11 +199,9 @@ module axil_interconnect_tb;
                 @(posedge aclk);
                 m_axil_araddr[master_id] = '0;
                 m_axil_arvalid[master_id] = 0;
+                m_axil_rready[master_id] = 1;
 
                 wait(m_axil_rvalid[master_id]);
-
-                @(posedge aclk);
-                m_axil_rready[master_id] = 1;
 
                 @(posedge aclk);
                 m_axil_rready[master_id] = 0;
@@ -232,13 +230,13 @@ module axil_interconnect_tb;
                 s_axil_arready[slave_id] = 0;
                 s_axil_rdata[slave_id] = $random;
                 s_axil_rvalid[slave_id] = 1;
-                s_axil_rresp[slave_id] = 2'b11;
+                s_axil_rresp[slave_id] = 2'b00;
  
-                wait(s_axil_rready[slave_id]); 
+                wait(s_axil_rready[slave_id]);
 
                 @(posedge aclk);
                 s_axil_rdata[slave_id] = '0;
-                s_axil_rvalid[slave_id] = 1;
+                s_axil_rvalid[slave_id] = 0;
                 s_axil_rresp[slave_id] = 2'b00;
             end
         endtask
