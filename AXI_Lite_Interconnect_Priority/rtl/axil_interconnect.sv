@@ -176,13 +176,15 @@ module axil_interconnect
             ) 
             axil_decoder_addr_wr_inst
             (
-                //.aclk(aclk),
-                //.aresetn(aresetn),
+                .aclk(aclk),
+                .aresetn(aresetn),
                 .addr(m_axil_awaddr[i]),
                 .slv_valid(slv_select_wire[i]),
                 .slv_invalid(slv_invalid_wr[i]),
                 .m_axil_awvalid(m_axil_awvalid[i]),
                 .m_axil_wvalid(m_axil_wvalid[i])
+                //.m_axil_bvalid(m_axil_bvalid[i]),
+                //.m_axil_bready(m_axil_bready[i])
             );
         end
     endgenerate

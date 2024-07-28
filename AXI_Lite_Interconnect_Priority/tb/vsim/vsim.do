@@ -33,6 +33,8 @@ vsim -t 1ns -L altera_mf_ver -voptargs="+acc" axil_interconnect_tb
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/aclk
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/aresetn
 
+add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_decoder_addr_wr[0]/axil_decoder_addr_wr_inst/slv_valid
+
 # Loop to add master write signals
 for {set i 0} {$i < $NUMBER_MASTER} {incr i} {
     add wave -radix binary          axil_interconnect_tb/axil_interconnect_wrapper_inst/axil_interconnect_inst/axil_response_addr_invalid_wr[$i]/axil_response_addr_invalid_wr/slv_invalid

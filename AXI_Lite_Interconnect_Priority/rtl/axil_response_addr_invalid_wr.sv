@@ -31,7 +31,7 @@ module axil_response_addr_invalid_wr
     {  
         IDLE,
         RESP,
-        ACKN
+        HAND
     } state_type_wr;
 
     state_type_wr state_wr;
@@ -42,6 +42,7 @@ module axil_response_addr_invalid_wr
         begin
             state_wr        <= IDLE;
             s_axil_awready  <= 0;
+            s_axil_wready   <= 0;
             s_axil_bvalid   <= 0;
             s_axil_bresp    <= 2'b00;
         end else
@@ -49,27 +50,38 @@ module axil_response_addr_invalid_wr
             case (state_wr)
                 IDLE:
                     begin
-                        if (!slv_invalid)
-                        begin
-                            state_wr <= IDLE;
-                        end else
-                        begin
-                            state_wr <= RESP;
-                            s_axil_awready <= 1;
-                        end
+                        case ({s_axil_awvalid, s_axil_wvalid})
+                            2'b11:
+                                begin
+                                    if (!slv_invalid)
+                                    begin
+                                        state_wr <= IDLE;
+                                    end else
+                                    begin
+                                        state_wr <= RESP;
+                                        s_axil_awready <= 1;
+                                        s_axil_wready <= 1;
+                                    end
+                                end
+                            default:
+                                begin
+                                    state_wr <= IDLE;
+                                end
+                        endcase
                     end
                 RESP:
                     begin
-                        state_wr <= ACKN;
+                        state_wr <= HAND;
                         s_axil_awready <= 0;
+                        s_axil_wready <= 0;
                         s_axil_bvalid <= 1;
                         s_axil_bresp <= 2'b11;
                     end
-                ACKN:
+                HAND:
                     begin
                         if (!s_axil_bready)
                         begin
-                            state_wr <= ACKN;
+                            state_wr <= HAND;
                         end else
                         begin
                             state_wr <= IDLE;

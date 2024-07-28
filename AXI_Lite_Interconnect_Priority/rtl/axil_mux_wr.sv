@@ -8,7 +8,7 @@ module axil_mux_wr
     input   logic                               slv_invalid,
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Master
+    // Channel WRITE Master 0
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Channel Write Address
@@ -28,7 +28,7 @@ module axil_mux_wr
     input   logic                               m_axil_bready_0,
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Master
+    // Channel WRITE Master 1
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Channel Write Address
@@ -48,7 +48,7 @@ module axil_mux_wr
     output  logic                               m_axil_bready_1,
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Master
+    // Channel WRITE Master 2
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Channel Write Address
@@ -72,44 +72,46 @@ module axil_mux_wr
     begin
         if (!slv_invalid)
         begin
-            m_axil_awready_0        =   m_axil_awready_1;
-            m_axil_wready_0         =   m_axil_wready_1;
-            m_axil_bresp_0          =   m_axil_bresp_1;
-            m_axil_bvalid_0         =   m_axil_bvalid_1;
+            // Connect to Master 1
+            m_axil_awready_0 = m_axil_awready_1;
+            m_axil_wready_0 = m_axil_wready_1;
+            m_axil_bresp_0 = m_axil_bresp_1;
+            m_axil_bvalid_0 = m_axil_bvalid_1;
 
-            m_axil_awaddr_1         =   m_axil_awaddr_0;
-            m_axil_awvalid_1        =   m_axil_awvalid_0;
-            m_axil_wdata_1          =   m_axil_wdata_0;
-            m_axil_wstrb_1          =   m_axil_wstrb_0;
-            m_axil_wvalid_1         =   m_axil_wvalid_0;
-            m_axil_bready_1         =   m_axil_bready_0;
+            m_axil_awaddr_1 = m_axil_awaddr_0;
+            m_axil_awvalid_1 = m_axil_awvalid_0;
+            m_axil_wdata_1 = m_axil_wdata_0;
+            m_axil_wstrb_1 = m_axil_wstrb_0;
+            m_axil_wvalid_1 = m_axil_wvalid_0;
+            m_axil_bready_1 = m_axil_bready_0;
 
-            m_axil_awaddr_2         =   '0;
-            m_axil_awvalid_2        =   0;
-            m_axil_wdata_2          =   '0;
-            m_axil_wstrb_2          =   '0;
-            m_axil_wvalid_2         =   0;
-            m_axil_bready_2         =   0;
+            m_axil_awaddr_2 = '0;
+            m_axil_awvalid_2 = 0;
+            m_axil_wdata_2 = '0;
+            m_axil_wstrb_2 = '0;
+            m_axil_wvalid_2 = 0;
+            m_axil_bready_2 = 0;
         end else
         begin
-            m_axil_awready_0        =   m_axil_awready_2;
-            m_axil_wready_0         =   m_axil_wready_2;
-            m_axil_bresp_0          =   m_axil_bresp_2;
-            m_axil_bvalid_0         =   m_axil_bvalid_2;
+            // Connect to Master 2
+            m_axil_awready_0 = m_axil_awready_2;
+            m_axil_wready_0 = m_axil_wready_2;
+            m_axil_bresp_0 = m_axil_bresp_2;
+            m_axil_bvalid_0 = m_axil_bvalid_2;
 
-            m_axil_awaddr_1         =   '0;
-            m_axil_awvalid_1        =   0;
-            m_axil_wdata_1          =   '0;
-            m_axil_wstrb_1          =   '0;
-            m_axil_wvalid_1         =   0;
-            m_axil_bready_1         =   0;
+            m_axil_awaddr_1 = '0;
+            m_axil_awvalid_1 = 0;
+            m_axil_wdata_1 = '0;
+            m_axil_wstrb_1 = '0;
+            m_axil_wvalid_1 = 0;
+            m_axil_bready_1 = 0;
 
-            m_axil_awaddr_2         =   m_axil_awaddr_0;
-            m_axil_awvalid_2        =   m_axil_awvalid_0;
-            m_axil_wdata_2          =   m_axil_wdata_0;
-            m_axil_wstrb_2          =   m_axil_wstrb_0;
-            m_axil_wvalid_2         =   m_axil_wvalid_0;
-            m_axil_bready_2         =   m_axil_bready_0;
+            m_axil_awaddr_2 = m_axil_awaddr_0;
+            m_axil_awvalid_2 = m_axil_awvalid_0;
+            m_axil_wdata_2 = m_axil_wdata_0;
+            m_axil_wstrb_2 = m_axil_wstrb_0;
+            m_axil_wvalid_2 = m_axil_wvalid_0;
+            m_axil_bready_2 = m_axil_bready_0;
         end
     end
 
