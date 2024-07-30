@@ -3,35 +3,27 @@ module axil_interconnect_rd
     import axil_pkg ::*;
 
 (
-    // Globals Signals
+    // Global Signals
     input   logic                               aclk,
-    input   logic                               aresetn,
+    input   logic                               aresetn, 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////    
-
-    // Channel Read Address
+    // Channel Read Master Address
     input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_araddr           [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]         m_axil_arvalid,
     output  logic   [NUMBER_MASTER-1:0]         m_axil_arready,
 
-    // Channel Read Data
+    // Channel Read Master Data
     output  logic   [AXI_DATA_WIDTH-1:0]        m_axil_rdata            [NUMBER_MASTER],
     output  logic   [1:0]                       m_axil_rresp            [NUMBER_MASTER],
     output  logic   [NUMBER_MASTER-1:0]         m_axil_rvalid,
     input   logic   [NUMBER_MASTER-1:0]         m_axil_rready,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ Slave
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Read Address
+    // Channel Read Slave Address
     output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_araddr           [NUMBER_SLAVE+1],
     output  logic   [NUMBER_SLAVE:0]            s_axil_arvalid,
     input   logic   [NUMBER_SLAVE:0]            s_axil_arready,
 
-    // Channel Read Data
+    // Channel Read Slave Data
     input   logic   [AXI_DATA_WIDTH-1:0]        s_axil_rdata            [NUMBER_SLAVE+1],
     input   logic   [1:0]                       s_axil_rresp            [NUMBER_SLAVE+1],
     input   logic   [NUMBER_SLAVE:0]            s_axil_rvalid,
@@ -39,10 +31,6 @@ module axil_interconnect_rd
 );
 
     genvar i, j;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     logic   [NUMBER_SLAVE:0]                    slv_select_wire_rd      [NUMBER_MASTER];
     logic   [NUMBER_MASTER-1:0]                 slv_select_wire_rd_tr   [NUMBER_SLAVE+1];
@@ -54,10 +42,6 @@ module axil_interconnect_rd
     logic   [$clog2(NUMBER_SLAVE+1)-1:0]        grant_rd_cdr_wire_tr    [NUMBER_MASTER];   
 
     logic   [NUMBER_MASTER-1:0]                 m_axil_rready_wire      [NUMBER_SLAVE+1];
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     generate
         for (i = 0; i < NUMBER_MASTER; i++) begin : trans_master_rd

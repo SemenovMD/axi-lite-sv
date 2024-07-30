@@ -5,36 +5,28 @@ module axil_crossbar_ms_wr
 (
     input   logic   [NUMBER_MASTER-1:0]            grant_wr,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Write Address Master
+    // Channel Write Master Address
     input   logic   [AXI_ADDR_WIDTH-1:0]           m_axil_awaddr       [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]            m_axil_awvalid,
 
-    // Channel Write Data Master
+    // Channel Write Master Data
     input   logic   [AXI_DATA_WIDTH-1:0]           m_axil_wdata        [NUMBER_MASTER],
     input   logic   [AXI_DATA_WIDTH/8-1:0]         m_axil_wstrb        [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]            m_axil_wvalid,
 
-    // Channel Write Response Master
+    // Channel Write Master Response
     input   logic   [NUMBER_MASTER-1:0]            m_axil_bready,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Slave
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Write Address Slave
+    // Channel Write Slave Address
     output  logic   [AXI_ADDR_WIDTH-1:0]           s_axil_awaddr,
     output  logic                                  s_axil_awvalid,
 
-    // Channel Write Data Slave
+    // Channel Write Slave Data
     output  logic   [AXI_DATA_WIDTH-1:0]           s_axil_wdata,
     output  logic   [AXI_DATA_WIDTH/8-1:0]         s_axil_wstrb,
     output  logic                                  s_axil_wvalid,
 
-    // Channel Write Response Slave
+    // Channel Write Slave Response
     output  logic                                  s_axil_bready
 );
 

@@ -3,33 +3,25 @@ module axil_crossbar_sm_wr
     import axil_pkg ::*;
 
 (
-    input   logic   [NUMBER_SLAVE:0]               grant_wr_trans,
+    input   logic   [NUMBER_SLAVE:0]             grant_wr_trans,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // Channel Write Master Address
+    output  logic                                m_axil_awready,
 
-    // Channel Write Address Master
-    output  logic                                  m_axil_awready,
+    // Channel Write Master Data
+    output  logic                                m_axil_wready,
 
-    // Channel Write Data Master
-    output  logic                                  m_axil_wready,
+    // Channel Write Master Response
+    output  logic   [1:0]                        m_axil_bresp,
+    output  logic                                m_axil_bvalid,
 
-    // Channel Write Response Master
-    output  logic   [1:0]                          m_axil_bresp,
-    output  logic                                  m_axil_bvalid,
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Slave
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Write Address Slave
+    // Channel Write Slave Address
     input   logic   [NUMBER_SLAVE:0]             s_axil_awready,
 
-    // Channel Write Data Slave
+    // Channel Write Slave Data
     input   logic   [NUMBER_SLAVE:0]             s_axil_wready,
 
-    // Channel Write Response Slave
+    // Channel Write Slave Response
     input   logic   [1:0]                        s_axil_bresp        [NUMBER_SLAVE+1],
     input   logic   [NUMBER_SLAVE:0]             s_axil_bvalid
 );

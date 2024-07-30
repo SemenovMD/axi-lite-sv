@@ -3,56 +3,44 @@ module axil_interconnect_wr
     import axil_pkg ::*;
 
 (
-    // Globals Signals
+    // Global Signals
     input   logic                               aclk,
     input   logic                               aresetn,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Write Address
+    // Channel Write Master Address
     input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_awaddr           [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]         m_axil_awvalid,
     output  logic   [NUMBER_MASTER-1:0]         m_axil_awready,
 
-    // Channel Write Data
+    // Channel Write Master Data
     input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_wdata            [NUMBER_MASTER],
     input   logic   [AXI_DATA_WIDTH/8-1:0]      m_axil_wstrb            [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]         m_axil_wvalid,
     output  logic   [NUMBER_MASTER-1:0]         m_axil_wready,
 
-    // Channel Write Response
+    // Channel Write Master Response
     output  logic   [1:0]                       m_axil_bresp            [NUMBER_MASTER],
     output  logic   [NUMBER_MASTER-1:0]         m_axil_bvalid,
     input   logic   [NUMBER_MASTER-1:0]         m_axil_bready,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Slave
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Write Address
+    // Channel Write Slave Address
     output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_awaddr           [NUMBER_SLAVE+1],
     output  logic   [NUMBER_SLAVE:0]            s_axil_awvalid,
     input   logic   [NUMBER_SLAVE:0]            s_axil_awready,
 
-    // Channel Write Data
+    // Channel Write Slave Data
     output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_wdata            [NUMBER_SLAVE+1],
     output  logic   [AXI_DATA_WIDTH/8-1:0]      s_axil_wstrb            [NUMBER_SLAVE+1],
     output  logic   [NUMBER_SLAVE:0]            s_axil_wvalid,
     input   logic   [NUMBER_SLAVE:0]            s_axil_wready,
 
-    // Channel Write Response
+    // Channel Write Slave Response
     input   logic   [1:0]                       s_axil_bresp            [NUMBER_SLAVE+1],
     input   logic   [NUMBER_SLAVE:0]            s_axil_bvalid,
     output  logic   [NUMBER_SLAVE:0]            s_axil_bready
 );
 
     genvar i, j;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     logic   [NUMBER_SLAVE:0]                    slv_select_wire         [NUMBER_MASTER];
     logic   [NUMBER_MASTER-1:0]                 slv_select_wire_tr      [NUMBER_SLAVE+1];
@@ -63,11 +51,7 @@ module axil_interconnect_wr
     logic   [$clog2(NUMBER_MASTER)-1:0]         grant_wr_cdr_wire       [NUMBER_SLAVE+1];
     logic   [$clog2(NUMBER_SLAVE+1)-1:0]        grant_wr_cdr_wire_tr    [NUMBER_MASTER];   
 
-    logic   [NUMBER_MASTER-1:0]                 m_axil_bready_wire      [NUMBER_SLAVE+1];
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE
-    ////////////////////////////////////////////////////////////////////////////////////////////////  
+    logic   [NUMBER_MASTER-1:0]                 m_axil_bready_wire      [NUMBER_SLAVE+1]; 
 
     generate
         for (i = 0; i < NUMBER_MASTER; i++) begin : trans_master_wr

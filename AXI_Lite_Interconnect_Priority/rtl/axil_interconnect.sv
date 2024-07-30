@@ -3,6 +3,7 @@ module axil_interconnect
     import axil_pkg ::*;
 
 (
+    // Global Signals
     input   logic                               aclk,
     input   logic                               aresetn,
 
@@ -13,6 +14,7 @@ module axil_interconnect
 
     genvar i;
 
+    // Channel Write Master
     logic   [AXI_ADDR_WIDTH-1:0]        m_axil_awaddr               [NUMBER_MASTER];
     logic   [NUMBER_MASTER-1:0]         m_axil_awvalid;
     logic   [NUMBER_MASTER-1:0]         m_axil_awready;
@@ -26,7 +28,7 @@ module axil_interconnect
     logic   [NUMBER_MASTER-1:0]         m_axil_bvalid;
     logic   [NUMBER_MASTER-1:0]         m_axil_bready;
 
-
+    // Channel Write Slave
     logic   [AXI_ADDR_WIDTH-1:0]        s_axil_awaddr               [NUMBER_SLAVE+1];
     logic   [NUMBER_SLAVE:0]            s_axil_awvalid;
     logic   [NUMBER_SLAVE:0]            s_axil_awready;
@@ -40,9 +42,7 @@ module axil_interconnect
     logic   [NUMBER_SLAVE:0]            s_axil_bvalid;
     logic   [NUMBER_SLAVE:0]            s_axil_bready;
 
-
-
-
+    // Channel Read Master
     logic   [AXI_ADDR_WIDTH-1:0]        m_axil_araddr               [NUMBER_MASTER];
     logic   [NUMBER_MASTER-1:0]         m_axil_arvalid;
     logic   [NUMBER_MASTER-1:0]         m_axil_arready;
@@ -52,7 +52,7 @@ module axil_interconnect
     logic   [NUMBER_MASTER-1:0]         m_axil_rvalid;
     logic   [NUMBER_MASTER-1:0]         m_axil_rready;
 
-
+    // Channel Read Slave
     logic   [AXI_ADDR_WIDTH-1:0]        s_axil_araddr               [NUMBER_SLAVE+1];
     logic   [NUMBER_SLAVE:0]            s_axil_arvalid;
     logic   [NUMBER_SLAVE:0]            s_axil_arready;
@@ -61,6 +61,10 @@ module axil_interconnect
     logic   [1:0]                       s_axil_rresp                [NUMBER_SLAVE+1];
     logic   [NUMBER_SLAVE:0]            s_axil_rvalid;
     logic   [NUMBER_SLAVE:0]            s_axil_rready;
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Interconnect WRITE
+    ////////////////////////////////////////////////////////////////////////////////////
 
     axil_interconnect_wr axil_interconnect_wr_inst
     (   
@@ -122,6 +126,10 @@ module axil_interconnect
         end
     endgenerate
 
+    ////////////////////////////////////////////////////////////////////////////////////
+    // SLAVE RESPONSE ADDRESS WRITE INVALID
+    ////////////////////////////////////////////////////////////////////////////////////
+
     axil_response_addr_invalid_wr axil_response_addr_invalid_wr_inst
     (
         .aclk(aclk),
@@ -138,7 +146,9 @@ module axil_interconnect
         .s_axil_bready(s_axil_bready[NUMBER_SLAVE])
     );
 
-    ///////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    // Interconnect READ
+    ////////////////////////////////////////////////////////////////////////////////////
 
     axil_interconnect_rd axil_interconnect_rd_inst
     (
@@ -185,6 +195,10 @@ module axil_interconnect
             assign m_axil_rready[i]         =   s_axil[i].rready;
         end
     endgenerate
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    // SLAVE RESPONSE ADDRESS READ INVALID
+    ////////////////////////////////////////////////////////////////////////////////////
 
     axil_response_addr_invalid_rd axil_response_addr_invalid_rd_inst
     (

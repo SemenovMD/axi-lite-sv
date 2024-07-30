@@ -6,12 +6,10 @@ module axil_response_addr_invalid_rd
     input   logic                                   aclk,
     input   logic                                   aresetn,
 
-    // Channel Read Address
     input   logic   [AXI_ADDR_WIDTH-1:0]            s_axil_araddr,
     input   logic                                   s_axil_arvalid,
     output  logic                                   s_axil_arready,
 
-    // Channel Read Data
     output  logic   [AXI_DATA_WIDTH-1:0]            s_axil_rdata,
     output  logic   [1:0]                           s_axil_rresp,
     output  logic                                   s_axil_rvalid,

@@ -5,26 +5,18 @@ module axil_crossbar_ms_rd
 (
     input   logic   [NUMBER_MASTER-1:0]             grant_rd,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Read Address
+    // Channel Read Master Address
     input   logic   [AXI_ADDR_WIDTH-1:0]            m_axil_araddr       [NUMBER_MASTER],
     input   logic   [NUMBER_MASTER-1:0]             m_axil_arvalid,
 
-    // Channel Read Data
+    // Channel Read Master Data
     input   logic   [NUMBER_MASTER-1:0]             m_axil_rready,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ Slave
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Read Address
+    // Channel Read Slave Address
     output  logic   [AXI_ADDR_WIDTH-1:0]            s_axil_araddr,
     output  logic                                   s_axil_arvalid,
 
-    // Channel Read Data
+    // Channel Read Slave Data
     output  logic                                   s_axil_rready
 );
 

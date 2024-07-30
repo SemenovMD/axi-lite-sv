@@ -6,18 +6,15 @@ module axil_response_addr_invalid_wr
     input   logic                                   aclk,
     input   logic                                   aresetn,
 
-    // Channel Write Address
     input   logic   [AXI_ADDR_WIDTH-1:0]            s_axil_awaddr,
     input   logic                                   s_axil_awvalid,
     output  logic                                   s_axil_awready,
 
-    // Channel Write Data
     input   logic   [AXI_DATA_WIDTH-1:0]            s_axil_wdata,
     input   logic   [AXI_DATA_WIDTH/4-1:0]          s_axil_wstrb,
     input   logic                                   s_axil_wvalid,
     output  logic                                   s_axil_wready,
 
-    // Channel Write Response
     output  logic   [1:0]                           s_axil_bresp,
     output  logic                                   s_axil_bvalid,
     input   logic                                   s_axil_bready
