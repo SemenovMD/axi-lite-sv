@@ -7,8 +7,6 @@ module axil_response_addr_invalid_wr
 (
     input   logic                                   aclk,
     input   logic                                   aresetn,
-    
-    input   logic                                   slv_invalid,
 
     // Channel Write Address
     input   logic   [AXI_ADDR_WIDTH-1:0]            s_axil_awaddr,
@@ -53,15 +51,9 @@ module axil_response_addr_invalid_wr
                         case ({s_axil_awvalid, s_axil_wvalid})
                             2'b11:
                                 begin
-                                    if (!slv_invalid)
-                                    begin
-                                        state_wr <= IDLE;
-                                    end else
-                                    begin
-                                        state_wr <= RESP;
-                                        s_axil_awready <= 1;
-                                        s_axil_wready <= 1;
-                                    end
+                                    state_wr <= RESP;
+                                    s_axil_awready <= 1;
+                                    s_axil_wready <= 1;
                                 end
                             default:
                                 begin
