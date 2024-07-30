@@ -7,8 +7,6 @@ module axil_response_addr_invalid_rd
 (
     input   logic                                   aclk,
     input   logic                                   aresetn,
-    
-    input   logic                                   slv_invalid,
 
     // Channel Read Address
     input   logic   [AXI_ADDR_WIDTH-1:0]            s_axil_araddr,
@@ -50,14 +48,8 @@ module axil_response_addr_invalid_rd
                             state_rd <= IDLE;
                         end else
                         begin
-                            if (!slv_invalid)
-                            begin
-                                state_rd <= IDLE;
-                            end else
-                            begin
-                                state_rd <= RESP;
-                                s_axil_arready <= 1;
-                            end
+                            state_rd <= RESP;
+                            s_axil_arready <= 1;
                         end
                     end
                 RESP:

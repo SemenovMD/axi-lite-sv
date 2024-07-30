@@ -33,7 +33,7 @@ module axil_crossbar_sm_wr
     input   logic   [NUMBER_SLAVE:0]             s_axil_wready,
 
     // Channel Write Response Slave
-    input   logic   [1:0]                        s_axil_bresp        [NUMBER_SLAVE + 1],
+    input   logic   [1:0]                        s_axil_bresp        [NUMBER_SLAVE+1],
     input   logic   [NUMBER_SLAVE:0]             s_axil_bvalid
 );
 
@@ -44,7 +44,7 @@ module axil_crossbar_sm_wr
         m_axil_bresp    = '0;
         m_axil_bvalid   = 0;
 
-        for (int j = 0; j < NUMBER_SLAVE + 1; j++) 
+        for (int j = 0; j < NUMBER_SLAVE+1; j++)
         begin
             if (grant_wr_trans[j])
             begin

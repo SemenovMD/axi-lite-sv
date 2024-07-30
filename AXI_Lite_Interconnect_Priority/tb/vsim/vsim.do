@@ -10,16 +10,16 @@ vlog -sv tb/pkg_tb.sv
 # Compile the design and testbench
 vlog -sv rtl/axil_decoder_addr_wr.sv
 vlog -sv rtl/axil_response_addr_invalid_wr.sv
-vlog -sv rtl/axil_mux_wr.sv
 vlog -sv rtl/axil_arbiter_priority_wr.sv
 vlog -sv rtl/axil_crossbar_ms_wr.sv
 vlog -sv rtl/axil_crossbar_sm_wr.sv
+vlog -sv rtl/axil_interconnect_wr.sv
 vlog -sv rtl/axil_decoder_addr_rd.sv
 vlog -sv rtl/axil_response_addr_invalid_rd.sv
-vlog -sv rtl/axil_mux_rd.sv
 vlog -sv rtl/axil_arbiter_priority_rd.sv
 vlog -sv rtl/axil_crossbar_ms_rd.sv
 vlog -sv rtl/axil_crossbar_sm_rd.sv
+vlog -sv rtl/axil_interconnect_rd.sv
 vlog -sv rtl/axil_interconnect.sv
 vlog -sv rtl/axil_interconnect_wrapper_sv.sv
 vlog -sv tb/axil_interconnect_tb.sv

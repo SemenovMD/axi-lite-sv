@@ -1,15 +1,15 @@
 module axil_interconnect
 #(
     parameter                               NUMBER_MASTER                   = 1,
-    parameter                               NUMBER_SLAVE                    = 1,
-    parameter                               AXI_DATA_WIDTH                  = 32,   
+    parameter                               NUMBER_SLAVE                    = 16,
+    parameter                               AXI_DATA_WIDTH                  = 32,
     parameter                               AXI_ADDR_WIDTH                  = 32,
+
     parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_OFFSET [NUMBER_SLAVE]  = '{default: '0},
     parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_RANGE  [NUMBER_SLAVE]  = '{default: 1}
 )
 
 (
-    // Globals Signals
     input   logic                               aclk,
     input   logic                               aresetn,
 
@@ -38,24 +38,24 @@ module axil_interconnect
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Channel Write Address
-    output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_awaddr           [NUMBER_SLAVE+1],
-    output  logic   [NUMBER_SLAVE:0]          s_axil_awvalid,
-    input   logic   [NUMBER_SLAVE:0]          s_axil_awready,
+    output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_awaddr           [NUMBER_SLAVE],
+    output  logic   [NUMBER_SLAVE-1:0]          s_axil_awvalid,
+    input   logic   [NUMBER_SLAVE-1:0]          s_axil_awready,
 
     // Channel Write Data
-    output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_wdata            [NUMBER_SLAVE+1],
-    output  logic   [AXI_DATA_WIDTH/8-1:0]      s_axil_wstrb            [NUMBER_SLAVE+1],
-    output  logic   [NUMBER_SLAVE:0]          s_axil_wvalid,
-    input   logic   [NUMBER_SLAVE:0]          s_axil_wready,
+    output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_wdata            [NUMBER_SLAVE],
+    output  logic   [AXI_DATA_WIDTH/8-1:0]      s_axil_wstrb            [NUMBER_SLAVE],
+    output  logic   [NUMBER_SLAVE-1:0]          s_axil_wvalid,
+    input   logic   [NUMBER_SLAVE-1:0]          s_axil_wready,
 
     // Channel Write Response
-    input   logic   [1:0]                       s_axil_bresp            [NUMBER_SLAVE+1],
-    input   logic   [NUMBER_SLAVE:0]            s_axil_bvalid,
-    output  logic   [NUMBER_SLAVE:0]            s_axil_bready,
+    input   logic   [1:0]                       s_axil_bresp            [NUMBER_SLAVE],
+    input   logic   [NUMBER_SLAVE-1:0]          s_axil_bvalid,
+    output  logic   [NUMBER_SLAVE-1:0]          s_axil_bready,
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Channel READ Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////    
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Channel Read Address
     input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_araddr           [NUMBER_MASTER],
@@ -84,402 +84,154 @@ module axil_interconnect
     output  logic   [NUMBER_SLAVE-1:0]          s_axil_rready
 );
 
-    genvar i, j;
+    genvar i;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    logic   [AXI_ADDR_WIDTH-1:0]        s_axil_awaddr_1           [NUMBER_SLAVE+1];
+    logic   [NUMBER_SLAVE:0]            s_axil_awvalid_1;
+    logic   [NUMBER_SLAVE:0]            s_axil_awready_1;
 
-    logic   [NUMBER_SLAVE:0]                    slv_select_wire         [NUMBER_MASTER];
-    logic   [NUMBER_MASTER-1:0]                 slv_select_wire_tr      [NUMBER_SLAVE+1];
+    logic   [AXI_ADDR_WIDTH-1:0]        s_axil_wdata_1            [NUMBER_SLAVE+1];
+    logic   [AXI_DATA_WIDTH/8-1:0]      s_axil_wstrb_1            [NUMBER_SLAVE+1];
+    logic   [NUMBER_SLAVE:0]            s_axil_wvalid_1;
+    logic   [NUMBER_SLAVE:0]            s_axil_wready_1;
 
-    logic   [NUMBER_MASTER-1:0]                 grant_wr_wire           [NUMBER_SLAVE + 1];
-    logic   [NUMBER_SLAVE+1:0]                  grant_wr_wire_tr        [NUMBER_MASTER];
-
-    logic   [$clog2(NUMBER_MASTER)-1:0]         grant_wr_cdr_wire       [NUMBER_SLAVE+1];
-    logic   [$clog2(NUMBER_SLAVE+1)-1:0]        grant_wr_cdr_wire_tr    [NUMBER_MASTER];   
-
-    logic   [NUMBER_MASTER-1:0]                 m_axil_bready_wire      [NUMBER_SLAVE+1];
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    logic   [NUMBER_SLAVE-1:0]                  slv_select_wire_rd      [NUMBER_MASTER];
-    logic   [NUMBER_MASTER-1:0]                 slv_select_wire_rd_tr   [NUMBER_SLAVE];
-
-    logic   [NUMBER_MASTER-1:0]                 grant_rd_wire           [NUMBER_SLAVE];
-    logic   [NUMBER_SLAVE-1:0]                  grant_rd_wire_tr        [NUMBER_MASTER];
-
-    logic   [$clog2(NUMBER_MASTER)-1:0]         grant_rd_cdr_wire       [NUMBER_SLAVE];
-    logic   [$clog2(NUMBER_SLAVE)-1:0]          grant_rd_cdr_wire_tr    [NUMBER_MASTER];   
-
-    logic   [NUMBER_MASTER-1:0]                 m_axil_rready_wire      [NUMBER_SLAVE];
-
-    logic   [NUMBER_MASTER-1:0]                 slv_invalid_rd;
-
-    // Channel Read Address
-    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_araddr_1         [NUMBER_MASTER];
-    logic   [NUMBER_MASTER-1:0]                 m_axil_arvalid_1;
-    logic   [NUMBER_MASTER-1:0]                 m_axil_arready_1;
-
-    // Channel Read Data
-    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_rdata_1          [NUMBER_MASTER];
-    logic   [1:0]                               m_axil_rresp_1          [NUMBER_MASTER];
-    logic   [NUMBER_MASTER-1:0]                 m_axil_rvalid_1;
-    logic   [NUMBER_MASTER-1:0]                 m_axil_rready_1;
-
-    // Channel Read Address
-    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_araddr_2         [NUMBER_MASTER];
-    logic   [NUMBER_MASTER-1:0]                 m_axil_arvalid_2;
-    logic   [NUMBER_MASTER-1:0]                 m_axil_arready_2;
-
-    // Channel Read Data
-    logic   [AXI_ADDR_WIDTH-1:0]                m_axil_rdata_2          [NUMBER_MASTER];
-    logic   [1:0]                               m_axil_rresp_2          [NUMBER_MASTER];
-    logic   [NUMBER_MASTER-1:0]                 m_axil_rvalid_2;
-    logic   [NUMBER_MASTER-1:0]                 m_axil_rready_2;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE
-    ////////////////////////////////////////////////////////////////////////////////////////////////  
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : trans_master_wr
-            for (j = 0; j < NUMBER_SLAVE+1; j++) begin : trans_slave_wr
-                assign slv_select_wire_tr[j][i] = slv_select_wire[i][j];
-                assign m_axil_bready_wire[j][i] = m_axil_bready[i];
-                assign grant_wr_wire_tr[i][j]   = grant_wr_wire[j][i];
-            end
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_decoder_addr_wr
-            axil_decoder_addr_wr #(
-                .NUMBER_SLAVE(NUMBER_SLAVE),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),
-                .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
-                .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
-            ) 
-            
-            axil_decoder_addr_wr_inst
-            
-            (
-                .aclk(aclk),
-                .aresetn(aresetn),
-                .addr(m_axil_awaddr[i]),
-                .slv_valid(slv_select_wire[i]),
-                //.slv_invalid(slv_invalid_wr[i]),
-                .m_axil_awvalid(m_axil_awvalid[i]),
-                .m_axil_wvalid(m_axil_wvalid[i]),
-                .m_axil_bvalid(m_axil_bvalid[i]),
-                .m_axil_bready(m_axil_bready[i])
-            );
-        end
-    endgenerate
+    logic   [1:0]                       s_axil_bresp_1            [NUMBER_SLAVE+1];
+    logic   [NUMBER_SLAVE:0]            s_axil_bvalid_1;
+    logic   [NUMBER_SLAVE:0]            s_axil_bready_1;
 
 
-    // generate
-    //     for (i = 0; i < NUMBER_MASTER; i++) begin : axil_response_addr_invalid_wr
-    //         axil_response_addr_invalid_wr #(
-    //             .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-    //             .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-    //         )
 
-    //         axil_response_addr_invalid_wr_inst
-            
-    //         (
-    //             .aclk(aclk),
-    //             .aresetn(aresetn),
-    //             .slv_invalid(slv_invalid_wr[i]),
-    //             .s_axil_awaddr(m_axil_awaddr_2[i]),
-    //             .s_axil_awvalid(m_axil_awvalid_2[i]),
-    //             .s_axil_wdata(m_axil_wvalid_2[i]),
-    //             .s_axil_wstrb(m_axil_wstrb_2[i]),
-    //             .s_axil_wvalid(m_axil_wvalid_2[i]),
-    //             .s_axil_awready(m_axil_awready_2[i]),
-    //             .s_axil_wready(m_axil_wready_2[i]),
-    //             .s_axil_bresp(m_axil_bresp_2[i]),
-    //             .s_axil_bvalid(m_axil_bvalid_2[i]),
-    //             .s_axil_bready(m_axil_bready_2[i])
-    //         );
-    //     end
-    // endgenerate
+    logic   [AXI_ADDR_WIDTH-1:0]        s_axil_araddr_1           [NUMBER_SLAVE+1];
+    logic   [NUMBER_SLAVE:0]            s_axil_arvalid_1;
+    logic   [NUMBER_SLAVE:0]            s_axil_arready_1;
 
-    generate
-        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_arbiter_priority_wr
-            axil_arbiter_priority_wr #(
-                .NUMBER_MASTER(NUMBER_MASTER)
-            )
+    logic   [AXI_ADDR_WIDTH-1:0]        s_axil_rdata_1            [NUMBER_SLAVE+1];
+    logic   [1:0]                       s_axil_rresp_1            [NUMBER_SLAVE+1];
+    logic   [NUMBER_SLAVE:0]            s_axil_rvalid_1;
+    logic   [NUMBER_SLAVE:0]            s_axil_rready_1;
 
-            axil_arbiter_priority_wr_inst
-            
-            (
-                .aclk(aclk),
-                .aresetn(aresetn),
-                .request_wr(slv_select_wire_tr[i]),
-                .grant_wr(grant_wr_wire[i]),
-                .s_axil_bvalid(s_axil_bvalid[i]),
-                .m_axil_bready(m_axil_bready_wire[i])
-            );
-        end
-    endgenerate
+    axil_interconnect_wr #
 
-    axil_arbiter_priority_wr #(
-        .NUMBER_MASTER(NUMBER_MASTER)
+    (
+        .NUMBER_MASTER(NUMBER_MASTER),
+        .NUMBER_SLAVE(NUMBER_SLAVE),
+        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),
+        .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
+        .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
     )
 
-    axil_arbiter_priority_wr_inst_invalid
-    
+    axil_interconnect_wr_inst
+
     (
-        .aclk(aclk),
-        .aresetn(aresetn),
-        .request_wr(slv_select_wire_tr[NUMBER_SLAVE]),
-        .grant_wr(grant_wr_wire[NUMBER_SLAVE]),
-        .s_axil_bvalid(s_axil_bvalid[NUMBER_SLAVE]),
-        .m_axil_bready(m_axil_bready_wire[NUMBER_SLAVE])
+        .s_axil_awaddr(s_axil_awaddr_1),
+        .s_axil_awvalid(s_axil_awvalid_1),
+        .s_axil_awready(s_axil_awready_1),
+        .s_axil_wdata(s_axil_wdata_1),
+        .s_axil_wstrb(s_axil_wstrb_1),
+        .s_axil_wvalid(s_axil_wvalid_1),
+        .s_axil_wready(s_axil_wready_1),
+        .s_axil_bresp(s_axil_bresp_1),
+        .s_axil_bvalid(s_axil_bvalid_1),
+        .s_axil_bready(s_axil_bready_1),
+        .*
     );
 
     generate
-        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_crossbar_ms_wr
-            axil_crossbar_ms_wr #(
-                .NUMBER_MASTER(NUMBER_MASTER),
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
+        for (i = 0; i < NUMBER_SLAVE; i++) begin : gen_slave_wr
+            assign s_axil_awaddr[i]      =   s_axil_awaddr_1[i];
+            assign s_axil_awvalid[i]     =   s_axil_awvalid_1[i];
+            assign s_axil_awready_1[i]   =   s_axil_awready[i];
+            
+            assign s_axil_wdata[i]       =   s_axil_wdata_1[i];
+            assign s_axil_wstrb[i]       =   s_axil_wstrb_1[i];
+            assign s_axil_wvalid[i]      =   s_axil_wvalid_1[i];
+            assign s_axil_wready_1[i]    =   s_axil_wready[i];
 
-            axil_crossbar_ms_wr_inst
-
-            (
-                .grant_wr(grant_wr_wire[i]),
-                .m_axil_awaddr(m_axil_awaddr),
-                .m_axil_awvalid(m_axil_awvalid),
-                .m_axil_wdata(m_axil_wdata),
-                .m_axil_wstrb(m_axil_wstrb),
-                .m_axil_wvalid(m_axil_wvalid),
-                .m_axil_bready(m_axil_bready),
-                .s_axil_awaddr(s_axil_awaddr[i]),
-                .s_axil_awvalid(s_axil_awvalid[i]),
-                .s_axil_wdata(s_axil_wdata[i]),
-                .s_axil_wstrb(s_axil_wstrb[i]),
-                .s_axil_wvalid(s_axil_wvalid[i]),
-                .s_axil_bready(s_axil_bready[i])
-            );
+            assign s_axil_bresp_1[i]     =   s_axil_bresp[i];
+            assign s_axil_bvalid_1[i]    =   s_axil_bvalid[i];
+            assign s_axil_bready[i]      =   s_axil_bready_1[i];
         end
     endgenerate
 
-    axil_crossbar_ms_wr #(
-        .NUMBER_MASTER(NUMBER_MASTER),
+    axil_response_addr_invalid_wr #(
         .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
         .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
     )
 
-    axil_crossbar_ms_wr_inst_invalid
+    axil_response_addr_invalid_wr_inst
+    
+    (
+        .aclk(aclk),
+        .aresetn(aresetn),
+        .s_axil_awaddr(s_axil_awaddr_1[NUMBER_SLAVE]),
+        .s_axil_awvalid(s_axil_awvalid_1[NUMBER_SLAVE]),
+        .s_axil_wdata(s_axil_wvalid_1[NUMBER_SLAVE]),
+        .s_axil_wstrb(s_axil_wstrb_1[NUMBER_SLAVE]),
+        .s_axil_wvalid(s_axil_wvalid_1[NUMBER_SLAVE]),
+        .s_axil_awready(s_axil_awready_1[NUMBER_SLAVE]),
+        .s_axil_wready(s_axil_wready_1[NUMBER_SLAVE]),
+        .s_axil_bresp(s_axil_bresp_1[NUMBER_SLAVE]),
+        .s_axil_bvalid(s_axil_bvalid_1[NUMBER_SLAVE]),
+        .s_axil_bready(s_axil_bready_1[NUMBER_SLAVE])
+    );
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    axil_interconnect_rd #
 
     (
-        .grant_wr(grant_wr_wire[NUMBER_SLAVE]),
-        .m_axil_awaddr(m_axil_awaddr),
-        .m_axil_awvalid(m_axil_awvalid),
-        .m_axil_wdata(m_axil_wdata),
-        .m_axil_wstrb(m_axil_wstrb),
-        .m_axil_wvalid(m_axil_wvalid),
-        .m_axil_bready(m_axil_bready),
-        .s_axil_awaddr(s_axil_awaddr[NUMBER_SLAVE]),
-        .s_axil_awvalid(s_axil_awvalid[NUMBER_SLAVE]),
-        .s_axil_wdata(s_axil_wdata[NUMBER_SLAVE]),
-        .s_axil_wstrb(s_axil_wstrb[NUMBER_SLAVE]),
-        .s_axil_wvalid(s_axil_wvalid[NUMBER_SLAVE]),
-        .s_axil_bready(s_axil_bready[NUMBER_SLAVE])
+        .NUMBER_MASTER(NUMBER_MASTER),
+        .NUMBER_SLAVE(NUMBER_SLAVE),
+        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),
+        .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
+        .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
+    )
+
+    axil_interconnect_rd_inst
+
+    (
+        .s_axil_araddr(s_axil_araddr_1),
+        .s_axil_arvalid(s_axil_arvalid_1),
+        .s_axil_arready(s_axil_arready_1),
+        .s_axil_rdata(s_axil_rdata_1),
+        .s_axil_rresp(s_axil_rresp_1),
+        .s_axil_rvalid(s_axil_rvalid_1),
+        .s_axil_rready(s_axil_rready_1),
+        .*
     );
 
     generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_crossbar_sm_wr
-            axil_crossbar_sm_wr #(
-                .NUMBER_SLAVE(NUMBER_SLAVE),
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
-
-            axil_crossbar_sm_wr_inst
-
-            (
-                .grant_wr_trans(grant_wr_wire_tr[i]),
-                .m_axil_awready(m_axil_awready[i]),
-                .m_axil_wready(m_axil_wready[i]),
-                .m_axil_bresp(m_axil_bresp[i]),
-                .m_axil_bvalid(m_axil_bvalid[i]),
-                .s_axil_awready(s_axil_awready),
-                .s_axil_wready(s_axil_wready),
-                .s_axil_bresp(s_axil_bresp),
-                .s_axil_bvalid(s_axil_bvalid)
-            );
-        end
-    endgenerate
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : trans_master_rd
-            for (j = 0; j < NUMBER_SLAVE; j++) begin : trans_slave_rd
-                assign slv_select_wire_rd_tr[j][i] = slv_select_wire_rd[i][j];
-                assign m_axil_rready_wire[j][i] = m_axil_rready[i];
-                assign grant_rd_wire_tr[i][j]   = grant_rd_wire[j][i];
-            end
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_decoder_addr_rd
-            axil_decoder_addr_rd #(
-                .NUMBER_SLAVE(NUMBER_SLAVE),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),
-                .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
-                .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
-            ) 
-
-            axil_decoder_addr_rd_inst
+        for (i = 0; i < NUMBER_SLAVE; i++) begin : gen_slave_rd
+            assign s_axil_araddr[i]         =   s_axil_araddr_1[i];
+            assign s_axil_arvalid[i]        =   s_axil_arvalid_1[i];
+            assign s_axil_arready_1[i]      =   s_axil_arready[i];
             
-            (
-                .aclk(aclk),
-                .aresetn(aresetn),
-                .addr(m_axil_araddr[i]),
-                .slv_valid(slv_select_wire_rd[i]),
-                .slv_invalid(slv_invalid_rd[i]),
-                .m_axil_arvalid(m_axil_arvalid[i]),
-                .m_axil_rvalid(m_axil_rvalid[i]),
-                .m_axil_rready(m_axil_rready[i])
-            );
+            assign s_axil_rdata_1[i]        =   s_axil_rdata[i];
+            assign s_axil_rresp_1[i]        =   s_axil_rresp[i];
+            assign s_axil_rvalid_1[i]       =   s_axil_rvalid[i];
+            assign s_axil_rready[i]         =   s_axil_rready_1[i];
         end
     endgenerate
 
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_mux_rd
-            axil_mux_rd #(
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
+    axil_response_addr_invalid_rd #(
+        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
+        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
+    )
 
-            axil_mux_rd_inst
-            
-            (
-                .slv_invalid(slv_invalid_rd[i]),
-                .m_axil_araddr_0(m_axil_araddr[i]),
-                .m_axil_arvalid_0(m_axil_arvalid[i]),
-                .m_axil_arready_0(m_axil_arready[i]),
-                .m_axil_rdata_0(m_axil_rdata[i]),
-                .m_axil_rresp_0(m_axil_rresp[i]),
-                .m_axil_rvalid_0(m_axil_rvalid[i]),
-                .m_axil_rready_0(m_axil_rready[i]),
-                .m_axil_araddr_1(m_axil_araddr_1[i]),
-                .m_axil_arvalid_1(m_axil_arvalid_1[i]),
-                .m_axil_arready_1(m_axil_arready_1[i]),
-                .m_axil_rdata_1(m_axil_rdata_1[i]),
-                .m_axil_rresp_1(m_axil_rresp_1[i]),
-                .m_axil_rvalid_1(m_axil_rvalid_1[i]),
-                .m_axil_rready_1(m_axil_rready_1[i]),
-                .m_axil_araddr_2(m_axil_araddr_2[i]),
-                .m_axil_arvalid_2(m_axil_arvalid_2[i]),
-                .m_axil_arready_2(m_axil_arready_2[i]),
-                .m_axil_rdata_2(m_axil_rdata_2[i]),
-                .m_axil_rresp_2(m_axil_rresp_2[i]),
-                .m_axil_rvalid_2(m_axil_rvalid_2[i]),
-                .m_axil_rready_2(m_axil_rready_2[i])
-            );
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_response_addr_invalid_rd
-            axil_response_addr_invalid_rd #(
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
-
-            axil_response_addr_invalid_wr_inst
-            
-            (
-                .aclk(aclk),
-                .aresetn(aresetn),
-                .slv_invalid(slv_invalid_rd[i]),
-                .s_axil_araddr(m_axil_araddr_2[i]),
-                .s_axil_arvalid(m_axil_arvalid_2[i]),
-                .s_axil_arready(m_axil_arready_2[i]),
-                .s_axil_rdata(m_axil_rdata_2[i]),
-                .s_axil_rresp(m_axil_rresp_2[i]),
-                .s_axil_rvalid(m_axil_rvalid_2[i]),
-                .s_axil_rready(m_axil_rready_2[i])
-            );
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_arbiter_priority_rd
-            axil_arbiter_priority_rd #(
-                .NUMBER_MASTER(NUMBER_MASTER)
-            )
-            axil_arbiter_priority_rd_inst
-            (
-                .aclk(aclk),
-                .aresetn(aresetn),
-                .request_rd(slv_select_wire_rd_tr[i]),
-                .grant_rd(grant_rd_wire[i]),
-                .s_axil_rvalid(s_axil_rvalid[i]),
-                .m_axil_rready(m_axil_rready_wire[i])
-            );
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_crossbar_ms_rd
-            axil_crossbar_ms_rd #
-
-            (
-                .NUMBER_MASTER(NUMBER_MASTER),
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
-
-            axil_crossbar_ms_rd_inst
-
-            (
-                .grant_rd(grant_rd_wire[i]),
-                .m_axil_araddr(m_axil_araddr_1),
-                .m_axil_arvalid(m_axil_arvalid_1),
-                .m_axil_rready(m_axil_rready_1),
-                .s_axil_araddr(s_axil_araddr[i]),
-                .s_axil_arvalid(s_axil_arvalid[i]),
-                .s_axil_rready(s_axil_rready[i])
-            );
-        end
-    endgenerate
-
-    generate
-        for (i = 0; i < NUMBER_MASTER; i++) begin : axil_crossbar_sm_rd
-            axil_crossbar_sm_rd #
-
-            (
-                .NUMBER_SLAVE(NUMBER_SLAVE),
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
-
-            axil_crossbar_sm_rd_inst
-
-            (
-                .grant_rd_trans(grant_rd_wire_tr[i]),    
-                .m_axil_arready(m_axil_arready_1[i]),
-                .m_axil_rdata(m_axil_rdata_1[i]),
-                .m_axil_rresp(m_axil_rresp_1[i]),
-                .m_axil_rvalid(m_axil_rvalid_1[i]),
-                .s_axil_arready(s_axil_arready),
-                .s_axil_rdata(s_axil_rdata),
-                .s_axil_rresp(s_axil_rresp),
-                .s_axil_rvalid(s_axil_rvalid)
-            );
-        end
-    endgenerate
+    axil_response_addr_invalid_rd_inst
+    
+    (
+        .aclk(aclk),
+        .aresetn(aresetn),
+        .s_axil_araddr(s_axil_araddr_1[NUMBER_SLAVE]),
+        .s_axil_arvalid(s_axil_arvalid_1[NUMBER_SLAVE]),
+        .s_axil_arready(s_axil_arready_1[NUMBER_SLAVE]),
+        .s_axil_rdata(s_axil_rdata_1[NUMBER_SLAVE]),
+        .s_axil_rresp(s_axil_rresp_1[NUMBER_SLAVE]),
+        .s_axil_rvalid(s_axil_rvalid_1[NUMBER_SLAVE]),
+        .s_axil_rready(s_axil_rready_1[NUMBER_SLAVE])
+    );
 
 endmodule

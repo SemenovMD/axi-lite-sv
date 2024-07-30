@@ -6,7 +6,7 @@ module axil_crossbar_sm_rd
 )
 
 (
-    input   logic   [NUMBER_SLAVE-1:0]              grant_rd_trans,
+    input   logic   [NUMBER_SLAVE:0]                grant_rd_trans,
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Channel READ Master
@@ -25,12 +25,12 @@ module axil_crossbar_sm_rd
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Channel Read Address
-    input   logic   [NUMBER_SLAVE-1:0]              s_axil_arready,
+    input   logic   [NUMBER_SLAVE:0]                s_axil_arready,
 
     // Channel Read Data
-    input   logic   [AXI_DATA_WIDTH-1:0]            s_axil_rdata            [NUMBER_SLAVE],
-    input   logic   [1:0]                           s_axil_rresp            [NUMBER_SLAVE],
-    input   logic   [NUMBER_SLAVE-1:0]              s_axil_rvalid
+    input   logic   [AXI_DATA_WIDTH-1:0]            s_axil_rdata            [NUMBER_SLAVE+1],
+    input   logic   [1:0]                           s_axil_rresp            [NUMBER_SLAVE+1],
+    input   logic   [NUMBER_SLAVE:0]                s_axil_rvalid
 );
 
     always_comb
@@ -40,7 +40,7 @@ module axil_crossbar_sm_rd
         m_axil_rresp    = '0;
         m_axil_rvalid   = 0;
 
-        for (int j = 0; j < NUMBER_SLAVE; j++) 
+        for (int j = 0; j < NUMBER_SLAVE+1; j++) 
         begin
             if (grant_rd_trans[j])
             begin

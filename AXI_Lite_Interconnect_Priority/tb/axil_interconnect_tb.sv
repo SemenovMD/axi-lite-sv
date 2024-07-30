@@ -2,7 +2,7 @@
 
 module axil_interconnect_tb;
 
-    import pkg_tb::*;
+    import pkg_tb ::*;
     
     // Globals Signals
     logic                               aclk;

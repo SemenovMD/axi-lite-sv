@@ -12,7 +12,6 @@ module axil_decoder_addr_wr
 
     input   logic   [AXI_ADDR_WIDTH-1:0]    addr,
     output  logic   [NUMBER_SLAVE:0]        slv_valid,
-    //output  logic                           slv_invalid,
 
     input   logic                           m_axil_awvalid,
     input   logic                           m_axil_wvalid,
@@ -21,8 +20,7 @@ module axil_decoder_addr_wr
     input   logic                           m_axil_bready
 );
 
-    logic           [NUMBER_SLAVE:0]      slv_valid_wire;
-    //logic           [NUMBER_SLAVE-1:0]      slv_invalid_wire; 
+    logic           [NUMBER_SLAVE:0]        slv_valid_wire;
 
     genvar i;
 
@@ -40,7 +38,6 @@ module axil_decoder_addr_wr
         begin
             state_dec <= IDLE;
             slv_valid <= '0;
-            //slv_invalid <= 0;
         end else
         begin
             case (state_dec)
@@ -53,7 +50,6 @@ module axil_decoder_addr_wr
                         begin
                             state_dec <= HAND;
                             slv_valid <= slv_valid_wire;
-                            //slv_invalid <= slv_invalid_wire;
                         end
                     end
                 HAND:
@@ -65,7 +61,6 @@ module axil_decoder_addr_wr
                         begin
                             state_dec <= IDLE;
                             slv_valid <= 0;
-                            //slv_invalid <= 0;
                         end
                     end
             endcase
