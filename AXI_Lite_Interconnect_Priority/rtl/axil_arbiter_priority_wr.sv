@@ -1,7 +1,6 @@
 module axil_arbiter_priority_wr
-#(
-    parameter   NUMBER_MASTER   =   20
-)
+
+    import axil_pkg ::*;
 
 (
     input   logic                                   aclk,

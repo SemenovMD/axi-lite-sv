@@ -1,8 +1,6 @@
 module axil_response_addr_invalid_wr
-#(
-    parameter   AXI_DATA_WIDTH  =   32,
-    parameter   AXI_ADDR_WIDTH  =   32
-)
+
+    import axil_pkg ::*;
 
 (
     input   logic                                   aclk,

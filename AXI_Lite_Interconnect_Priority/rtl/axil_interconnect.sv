@@ -1,13 +1,6 @@
 module axil_interconnect
-#(
-    parameter                               NUMBER_MASTER                   = 1,
-    parameter                               NUMBER_SLAVE                    = 16,
-    parameter                               AXI_DATA_WIDTH                  = 32,
-    parameter                               AXI_ADDR_WIDTH                  = 32,
 
-    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_OFFSET [NUMBER_SLAVE]  = '{default: '0},
-    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_RANGE  [NUMBER_SLAVE]  = '{default: 1}
-)
+    import axil_pkg ::*;
 
 (
     input   logic                               aclk,
@@ -69,19 +62,7 @@ module axil_interconnect
     logic   [NUMBER_SLAVE:0]            s_axil_rvalid;
     logic   [NUMBER_SLAVE:0]            s_axil_rready;
 
-    axil_interconnect_wr #
-
-    (
-        .NUMBER_MASTER(NUMBER_MASTER),
-        .NUMBER_SLAVE(NUMBER_SLAVE),
-        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),
-        .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
-        .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
-    )
-
-    axil_interconnect_wr_inst
-
+    axil_interconnect_wr axil_interconnect_wr_inst
     (   
         .aclk(aclk),
         .aresetn(aresetn),
@@ -141,13 +122,7 @@ module axil_interconnect
         end
     endgenerate
 
-    axil_response_addr_invalid_wr #(
-        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-    )
-
-    axil_response_addr_invalid_wr_inst
-    
+    axil_response_addr_invalid_wr axil_response_addr_invalid_wr_inst
     (
         .aclk(aclk),
         .aresetn(aresetn),
@@ -165,19 +140,7 @@ module axil_interconnect
 
     ///////////////////////////////////////////////////////////////////////////
 
-    axil_interconnect_rd #
-
-    (
-        .NUMBER_MASTER(NUMBER_MASTER),
-        .NUMBER_SLAVE(NUMBER_SLAVE),
-        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),
-        .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
-        .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
-    )
-
-    axil_interconnect_rd_inst
-
+    axil_interconnect_rd axil_interconnect_rd_inst
     (
         .aclk(aclk),
         .aresetn(aresetn),
@@ -223,13 +186,7 @@ module axil_interconnect
         end
     endgenerate
 
-    axil_response_addr_invalid_rd #(
-        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-    )
-
-    axil_response_addr_invalid_rd_inst
-    
+    axil_response_addr_invalid_rd axil_response_addr_invalid_rd_inst
     (
         .aclk(aclk),
         .aresetn(aresetn),

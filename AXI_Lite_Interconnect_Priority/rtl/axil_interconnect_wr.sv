@@ -1,12 +1,6 @@
 module axil_interconnect_wr
-#(
-    parameter                               NUMBER_MASTER                   = 1,
-    parameter                               NUMBER_SLAVE                    = 1,
-    parameter                               AXI_DATA_WIDTH                  = 32,   
-    parameter                               AXI_ADDR_WIDTH                  = 32,
-    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_OFFSET [NUMBER_SLAVE]  = '{default: '0},
-    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_RANGE  [NUMBER_SLAVE]  = '{default: 1}
-)
+    
+    import axil_pkg ::*;
 
 (
     // Globals Signals
@@ -87,15 +81,7 @@ module axil_interconnect_wr
 
     generate
         for (i = 0; i < NUMBER_MASTER; i++) begin : axil_decoder_addr_wr
-            axil_decoder_addr_wr #(
-                .NUMBER_SLAVE(NUMBER_SLAVE),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH),
-                .AXI_ADDR_OFFSET(AXI_ADDR_OFFSET),
-                .AXI_ADDR_RANGE(AXI_ADDR_RANGE)
-            ) 
-            
-            axil_decoder_addr_wr_inst
-            
+            axil_decoder_addr_wr axil_decoder_addr_wr_inst
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -111,12 +97,7 @@ module axil_interconnect_wr
 
     generate
         for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_arbiter_priority_wr
-            axil_arbiter_priority_wr #(
-                .NUMBER_MASTER(NUMBER_MASTER)
-            )
-
-            axil_arbiter_priority_wr_inst
-            
+            axil_arbiter_priority_wr axil_arbiter_priority_wr_inst
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -128,12 +109,7 @@ module axil_interconnect_wr
         end
     endgenerate
 
-    axil_arbiter_priority_wr #(
-        .NUMBER_MASTER(NUMBER_MASTER)
-    )
-
-    axil_arbiter_priority_wr_inst_invalid
-    
+    axil_arbiter_priority_wr axil_arbiter_priority_wr_inst_invalid
     (
         .aclk(aclk),
         .aresetn(aresetn),
@@ -145,14 +121,7 @@ module axil_interconnect_wr
 
     generate
         for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_crossbar_ms_wr
-            axil_crossbar_ms_wr #(
-                .NUMBER_MASTER(NUMBER_MASTER),
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
-
-            axil_crossbar_ms_wr_inst
-
+            axil_crossbar_ms_wr axil_crossbar_ms_wr_inst
             (
                 .grant_wr(grant_wr_wire[i]),
                 .m_axil_awaddr(m_axil_awaddr),
@@ -171,14 +140,7 @@ module axil_interconnect_wr
         end
     endgenerate
 
-    axil_crossbar_ms_wr #(
-        .NUMBER_MASTER(NUMBER_MASTER),
-        .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-        .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-    )
-
-    axil_crossbar_ms_wr_inst_invalid
-
+    axil_crossbar_ms_wr axil_crossbar_ms_wr_inst_invalid
     (
         .grant_wr(grant_wr_wire[NUMBER_SLAVE]),
         .m_axil_awaddr(m_axil_awaddr),
@@ -197,14 +159,7 @@ module axil_interconnect_wr
 
     generate
         for (i = 0; i < NUMBER_MASTER; i++) begin : axil_crossbar_sm_wr
-            axil_crossbar_sm_wr #(
-                .NUMBER_SLAVE(NUMBER_SLAVE),
-                .AXI_DATA_WIDTH(AXI_DATA_WIDTH),
-                .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)
-            )
-
-            axil_crossbar_sm_wr_inst
-
+            axil_crossbar_sm_wr axil_crossbar_sm_wr_inst
             (
                 .grant_wr_trans(grant_wr_wire_tr[i]),
                 .m_axil_awready(m_axil_awready[i]),

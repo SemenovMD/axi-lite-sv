@@ -1,10 +1,6 @@
 module axil_decoder_addr_wr
-#(
-    parameter                               NUMBER_SLAVE                    =   4,
-    parameter                               AXI_ADDR_WIDTH                  =   32,
-    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_OFFSET [NUMBER_SLAVE]  =   '{default: '0},
-    parameter   bit [AXI_ADDR_WIDTH-1:0]    AXI_ADDR_RANGE  [NUMBER_SLAVE]  =   '{default: 1}
-)
+
+    import axil_pkg ::*;
 
 (
     input   logic                           aclk,

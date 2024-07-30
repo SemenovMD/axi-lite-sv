@@ -1,9 +1,6 @@
 module axil_crossbar_ms_rd
-#(
-    parameter   NUMBER_MASTER   = 4,
-    parameter   AXI_DATA_WIDTH  = 32,
-    parameter   AXI_ADDR_WIDTH  = 32      
-)
+
+    import axil_pkg ::*;
 
 (
     input   logic   [NUMBER_MASTER-1:0]             grant_rd,

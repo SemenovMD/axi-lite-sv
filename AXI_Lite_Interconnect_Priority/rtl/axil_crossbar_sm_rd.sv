@@ -1,9 +1,6 @@
 module axil_crossbar_sm_rd
-#(
-    parameter   NUMBER_SLAVE    = 8,
-    parameter   AXI_DATA_WIDTH  = 32,
-    parameter   AXI_ADDR_WIDTH  = 32
-)
+
+    import axil_pkg ::*;
 
 (
     input   logic   [NUMBER_SLAVE:0]                grant_rd_trans,
