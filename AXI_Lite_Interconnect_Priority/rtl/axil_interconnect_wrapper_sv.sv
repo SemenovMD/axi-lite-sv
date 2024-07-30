@@ -44,75 +44,9 @@ module axil_interconnect_wrapper_sv
     input   logic                               aclk,
     input   logic                               aresetn,
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Write Address
-    input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_awaddr           [NUMBER_MASTER],
-    input   logic   [NUMBER_MASTER-1:0]         m_axil_awvalid,
-    output  logic   [NUMBER_MASTER-1:0]         m_axil_awready,
-
-    // Channel Write Data
-    input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_wdata            [NUMBER_MASTER],
-    input   logic   [AXI_DATA_WIDTH/8-1:0]      m_axil_wstrb            [NUMBER_MASTER],
-    input   logic   [NUMBER_MASTER-1:0]         m_axil_wvalid,
-    output  logic   [NUMBER_MASTER-1:0]         m_axil_wready,
-
-    // Channel Write Response
-    output  logic   [1:0]                       m_axil_bresp            [NUMBER_MASTER],
-    output  logic   [NUMBER_MASTER-1:0]         m_axil_bvalid,
-    input   logic   [NUMBER_MASTER-1:0]         m_axil_bready,
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel WRITE Slave
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Write Address
-    output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_awaddr           [NUMBER_SLAVE],
-    output  logic   [NUMBER_SLAVE-1:0]          s_axil_awvalid,
-    input   logic   [NUMBER_SLAVE-1:0]          s_axil_awready,
-
-    // Channel Write Data
-    output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_wdata            [NUMBER_SLAVE],
-    output  logic   [AXI_DATA_WIDTH/8-1:0]      s_axil_wstrb            [NUMBER_SLAVE],
-    output  logic   [NUMBER_SLAVE-1:0]          s_axil_wvalid,
-    input   logic   [NUMBER_SLAVE-1:0]          s_axil_wready,
-
-    // Channel Write Response
-    input   logic   [1:0]                       s_axil_bresp            [NUMBER_SLAVE],
-    input   logic   [NUMBER_SLAVE-1:0]          s_axil_bvalid,
-    output  logic   [NUMBER_SLAVE-1:0]          s_axil_bready,
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ Master
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Read Address
-    input   logic   [AXI_ADDR_WIDTH-1:0]        m_axil_araddr           [NUMBER_MASTER],
-    input   logic   [NUMBER_MASTER-1:0]         m_axil_arvalid,
-    output  logic   [NUMBER_MASTER-1:0]         m_axil_arready,
-
-    // Channel Read Data
-    output  logic   [AXI_DATA_WIDTH-1:0]        m_axil_rdata            [NUMBER_MASTER],
-    output  logic   [1:0]                       m_axil_rresp            [NUMBER_MASTER],
-    output  logic   [NUMBER_MASTER-1:0]         m_axil_rvalid,
-    input   logic   [NUMBER_MASTER-1:0]         m_axil_rready,
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Channel READ Slave
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // Channel Read Address
-    output  logic   [AXI_ADDR_WIDTH-1:0]        s_axil_araddr           [NUMBER_SLAVE],
-    output  logic   [NUMBER_SLAVE-1:0]          s_axil_arvalid,
-    input   logic   [NUMBER_SLAVE-1:0]          s_axil_arready,
-
-    // Channel Read Data
-    input   logic   [AXI_DATA_WIDTH-1:0]        s_axil_rdata            [NUMBER_SLAVE],
-    input   logic   [1:0]                       s_axil_rresp            [NUMBER_SLAVE],
-    input   logic   [NUMBER_SLAVE-1:0]          s_axil_rvalid,
-    output  logic   [NUMBER_SLAVE-1:0]          s_axil_rready
+    // Interface
+    axil_if.m_axil                              m_axil              [NUMBER_SLAVE],
+    axil_if.s_axil                              s_axil              [NUMBER_MASTER]
 );
 
     axil_interconnect #
