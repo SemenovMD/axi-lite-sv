@@ -3,13 +3,12 @@
 module axil_interconnect_tb;
 
     import pkg_tb ::*;
-    
-    logic                               aclk;
-    logic                               aresetn;
 
-    axil_if                             m_axil()    [NUMBER_SLAVE];
-    axil_if                             s_axil()    [NUMBER_MASTER];
+    logic   aclk;
+    logic   aresetn;
 
+    axil_if m_axil  [NUMBER_SLAVE]    ();
+    axil_if s_axil  [NUMBER_MASTER]   ();
 
     axil_interconnect_wrapper_sv axil_interconnect_wrapper_sv_inst 
     (
@@ -20,9 +19,9 @@ module axil_interconnect_tb;
     );
 
     class AXI_Lite_Master_Write;
-        int master_id;
-        function new(int id);
-            this.master_id = id;
+        virtual axil_if s_axil_if;
+        function new(virtual axil_if s_axil_if);
+            this.s_axil_if = s_axil_if;
         endfunction
 
         task run();
@@ -31,36 +30,36 @@ module axil_interconnect_tb;
                 repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
                 
                 @(posedge aclk);
-                s_axil.awaddr[master_id] = $random;
-                s_axil.awvalid[master_id] = 1;
+                s_axil_if.awaddr = $random;
+                s_axil_if.awvalid = 1;
                 
-                s_axil.wdata[master_id] = $random;
-                s_axil.wstrb[master_id] = 4'b1111;
-                s_axil.wvalid[master_id] = 1;
+                s_axil_if.wdata = $random;
+                s_axil_if.wstrb = 4'b1111;
+                s_axil_if.wvalid = 1;
 
-                wait(s_axil.awready[master_id] && s_axil.wready[master_id]);
-
-                @(posedge aclk);
-                s_axil.awaddr[master_id] = '0;
-                s_axil.awvalid[master_id] = 0;
-
-                s_axil.wdata[master_id] = '0;
-                s_axil.wstrb[master_id] = '0;
-                s_axil.wvalid[master_id] = 0;
-                s_axil.bready[master_id] = 1;
-
-                wait(s_axil.bvalid[master_id]);
+                wait(s_axil_if.awready && s_axil_if.wready);
 
                 @(posedge aclk);
-                s_axil.bready[master_id] = 0;
+                s_axil_if.awaddr = '0;
+                s_axil_if.awvalid = 0;
+
+                s_axil_if.wdata = '0;
+                s_axil_if.wstrb = '0;
+                s_axil_if.wvalid = 0;
+                s_axil_if.bready = 1;
+
+                wait(s_axil_if.bvalid);
+
+                @(posedge aclk);
+                s_axil_if.bready = 0;
             end
         endtask
     endclass
 
     class AXI_Lite_Slave_Write;
-        int slave_id;
-        function new(int id);
-            this.slave_id = id;
+        virtual axil_if m_axil_if;
+        function new(virtual axil_if m_axil_if);
+            this.m_axil_if = m_axil_if;
         endfunction
 
         task run();
@@ -69,31 +68,31 @@ module axil_interconnect_tb;
                 repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
                 
                 @(posedge aclk);
-                wait(m_axil.awvalid[slave_id] && m_axil.wvalid[slave_id]);
+                wait(m_axil_if.awvalid && m_axil_if.wvalid);
 
                 @(posedge aclk);
-                m_axil.awready[slave_id] = 1;
-                m_axil.wready[slave_id] = 1;
+                m_axil_if.awready = 1;
+                m_axil_if.wready = 1;
 
                 @(posedge aclk);
-                m_axil.awready[slave_id] = 0;
-                m_axil.wready[slave_id] = 0;
-                m_axil.bvalid[slave_id] = 1;
-                m_axil.bresp[slave_id] = 2'b00;
+                m_axil_if.awready = 0;
+                m_axil_if.wready = 0;
+                m_axil_if.bvalid = 1;
+                m_axil_if.bresp = 2'b00;
  
-                wait(m_axil.bready[slave_id]); 
+                wait(m_axil_if.bready); 
 
                 @(posedge aclk);
-                m_axil.bvalid[slave_id] = 0;
-                m_axil.bresp[slave_id] = 2'b00;
+                m_axil_if.bvalid = 0;
+                m_axil_if.bresp = 2'b00;
             end
         endtask
     endclass
 
     class AXI_Lite_Master_Read;
-        int master_id;
-        function new(int id);
-            this.master_id = id;
+        virtual axil_if s_axil_if;
+        function new(virtual axil_if s_axil_if);
+            this.s_axil_if = s_axil_if;
         endfunction
 
         task run();
@@ -102,28 +101,28 @@ module axil_interconnect_tb;
                 repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
                 
                 @(posedge aclk);
-                s_axil.araddr[master_id] = $random;
-                s_axil.arvalid[master_id] = 1;
+                s_axil_if.araddr = $random;
+                s_axil_if.arvalid = 1;
 
-                wait(s_axil.arready[master_id]);
-
-                @(posedge aclk);
-                s_axil.araddr[master_id] = '0;
-                s_axil.arvalid[master_id] = 0;
-                s_axil.rready[master_id] = 1;
-
-                wait(s_axil.rvalid[master_id]);
+                wait(s_axil_if.arready);
 
                 @(posedge aclk);
-                s_axil.rready[master_id] = 0;
+                s_axil_if.araddr = '0;
+                s_axil_if.arvalid = 0;
+                s_axil_if.rready = 1;
+
+                wait(s_axil_if.rvalid);
+
+                @(posedge aclk);
+                s_axil_if.rready = 0;
             end
         endtask
     endclass
 
     class AXI_Lite_Slave_Read;
-        int slave_id;
-        function new(int id);
-            this.slave_id = id;
+        virtual axil_if m_axil_if;
+        function new(virtual axil_if m_axil_if);
+            this.m_axil_if = m_axil_if;
         endfunction
 
         task run();
@@ -132,23 +131,23 @@ module axil_interconnect_tb;
                 repeat ($urandom_range(AXI_TRAN_MIN_DELAY, AXI_TRAN_MAX_DELAY)) @(posedge aclk);
                 
                 @(posedge aclk);
-                wait(m_axil.arvalid[slave_id]);
+                wait(m_axil_if.arvalid);
 
                 @(posedge aclk);
-                m_axil.arready[slave_id] = 1;
+                m_axil_if.arready = 1;
 
                 @(posedge aclk);
-                m_axil.arready[slave_id] = 0;
-                m_axil.rdata[slave_id] = $random;
-                m_axil.rvalid[slave_id] = 1;
-                m_axil.rresp[slave_id] = 2'b00;
+                m_axil_if.arready = 0;
+                m_axil_if.rdata = $random;
+                m_axil_if.rvalid = 1;
+                m_axil_if.rresp = 2'b00;
  
-                wait(m_axil.rready[slave_id]);
+                wait(m_axil_if.rready);
 
                 @(posedge aclk);
-                m_axil.rdata[slave_id] = '0;
-                m_axil.rvalid[slave_id] = 0;
-                m_axil.rresp[slave_id] = 2'b00;
+                m_axil_if.rdata = '0;
+                m_axil_if.rvalid = 0;
+                m_axil_if.rresp = 2'b00;
             end
         endtask
     endclass
@@ -165,44 +164,44 @@ module axil_interconnect_tb;
         #100 aresetn = 1; 
     end
 
-    initial begin
-        // Initialize Master Write Interfaces
-        for (int i = 0; i < NUMBER_MASTER; i++) 
-        begin
-            s_axil.awaddr[i] = '0;
-            s_axil.awvalid[i] = 0;
-            s_axil.wdata[i] = '0;
-            s_axil.wstrb[i] = '0;
-            s_axil.wvalid[i] = 0;
-            s_axil.bready[i] = 0;
-        end
-
-        // Initialize Slave Write Interfaces
-        for (int i = 0; i < NUMBER_SLAVE; i++) 
-        begin
-            m_axil.awready[i] = '0;
-            m_axil.wready[i] = 0;
-            m_axil.bresp[i] = '0;
-            m_axil.bvalid[i] = 0;
-        end
-
-        // Initialize Master Read Interfaces
-        for (int i = 0; i < NUMBER_MASTER; i++) 
-        begin
-            s_axil.araddr[i] = '0;
-            s_axil.arvalid[i] = 0;
-            s_axil.rready[i] = 0;
-        end
-
-        // Initialize Slave Read Interfaces
-        for (int i = 0; i < NUMBER_SLAVE; i++) 
-        begin
-            m_axil.arready[i] = 0;
-            m_axil.rdata[i] = '0;
-            m_axil.rvalid[i] = '0;
-            m_axil.rresp[i] = '0;
-        end
-    end
+    //initial begin
+    //    // Initialize Master Write Interfaces
+    //    for (int i = 0; i < NUMBER_SLAVE; i++) 
+    //    begin
+    //        m_axil[i].awaddr = '0;
+    //        m_axil[i].awvalid = 0;
+    //        m_axil[i].wdata = '0;
+    //        m_axil[i].wstrb = '0;
+    //        m_axil[i].wvalid = 0;
+    //        m_axil[i].bready = 0;
+    //    end
+//
+    //    // Initialize Slave Write Interfaces
+    //    for (int i = 0; i < NUMBER_MASTER; i++) 
+    //    begin
+    //        s_axil[i].awready = '0;
+    //        s_axil[i].wready = 0;
+    //        s_axil[i].bresp = '0;
+    //        s_axil[i].bvalid = 0;
+    //    end
+//
+    //    // Initialize Master Read Interfaces
+    //    for (int i = 0; i < NUMBER_SLAVE; i++) 
+    //    begin
+    //        m_axil[i].araddr = '0;
+    //        m_axil[i].arvalid = 0;
+    //        m_axil[i].rready = 0;
+    //    end
+//
+    //    // Initialize Slave Read Interfaces
+    //    for (int i = 0; i < NUMBER_MASTER; i++) 
+    //    begin
+    //        s_axil[i].arready = 0;
+    //        s_axil[i].rdata = '0;
+    //        s_axil[i].rvalid = '0;
+    //        s_axil[i].rresp = '0;
+    //    end
+    //end
 
     AXI_Lite_Master_Write   master_wr  [NUMBER_MASTER];
     AXI_Lite_Slave_Write    slave_wr   [NUMBER_SLAVE];
@@ -214,48 +213,30 @@ module axil_interconnect_tb;
     begin
         for (int i = 0; i < NUMBER_MASTER; i++) 
         begin
-            master_wr[i] = new(i);
-            master_rd[i] = new(i);           
+            master_wr[i] = new();
+            master_rd[i] = new();           
         end
 
         for (int j = 0; j < NUMBER_SLAVE; j++) 
         begin
-            slave_wr[j] = new(j);
-            slave_rd[j] = new(j);
+            slave_wr[j] = new();
+            slave_rd[j] = new();
         end
 
         #100;
 
         fork
-            master_wr[0].run();    master_wr[1].run();    master_wr[2].run();    master_wr[3].run(); 
-            master_wr[4].run();    master_wr[5].run();    master_wr[6].run();    master_wr[7].run();
-            master_wr[8].run();    master_wr[9].run();    master_wr[10].run();   master_wr[11].run();
-            master_wr[12].run();   master_wr[13].run();   master_wr[14].run();   master_wr[15].run();
-            master_wr[16].run();   master_wr[17].run();   master_wr[18].run();   master_wr[19].run();
-            master_wr[20].run();   master_wr[21].run();   master_wr[22].run();   master_wr[23].run();
-            master_wr[24].run();   master_wr[25].run();   master_wr[26].run();   master_wr[27].run();
-            master_wr[28].run();   master_wr[29].run();   master_wr[30].run();   master_wr[31].run();
+            for (int i = 0; i < NUMBER_MASTER; i++)
+            begin
+                master_wr[i].run();
+                master_rd[i].run();
+            end
 
-            slave_wr[0].run();     slave_wr[1].run();     slave_wr[2].run();     slave_wr[3].run();
-            slave_wr[4].run();     slave_wr[5].run();     slave_wr[6].run();     slave_wr[7].run();
-            slave_wr[8].run();     slave_wr[9].run();     slave_wr[10].run();    slave_wr[11].run();  
-            slave_wr[12].run();    slave_wr[13].run();    slave_wr[14].run();    slave_wr[15].run();
-
-
-
-            master_rd[0].run();    master_rd[1].run();    master_rd[2].run();    master_rd[3].run(); 
-            master_rd[4].run();    master_rd[5].run();    master_rd[6].run();    master_rd[7].run();
-            master_rd[8].run();    master_rd[9].run();    master_rd[10].run();   master_rd[11].run();
-            master_rd[12].run();   master_rd[13].run();   master_rd[14].run();   master_rd[15].run();
-            master_rd[16].run();   master_rd[17].run();   master_rd[18].run();   master_rd[19].run();
-            master_rd[20].run();   master_rd[21].run();   master_rd[22].run();   master_rd[23].run();
-            master_rd[24].run();   master_rd[25].run();   master_rd[26].run();   master_rd[27].run();
-            master_rd[28].run();   master_rd[29].run();   master_rd[30].run();   master_rd[31].run();
-
-            slave_rd[0].run();     slave_rd[1].run();     slave_rd[2].run();     slave_rd[3].run();
-            slave_rd[4].run();     slave_rd[5].run();     slave_rd[6].run();     slave_rd[7].run();
-            slave_rd[8].run();     slave_rd[9].run();     slave_rd[10].run();    slave_rd[11].run();  
-            slave_rd[12].run();    slave_rd[13].run();    slave_rd[14].run();    slave_rd[15].run();
+            for (int j = 0; j < NUMBER_SLAVE; j++)
+            begin
+                slave_wr[j].run();
+                slave_rd[j].run();
+            end
         join
 
         $finish;

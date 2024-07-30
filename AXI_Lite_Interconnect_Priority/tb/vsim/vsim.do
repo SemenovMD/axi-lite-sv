@@ -6,6 +6,10 @@ vlib work
 
 # Compile the packages
 vlog -sv tb/pkg_tb.sv
+vlog -sv rtl/axil_pkg.sv
+
+# Compile the interfaces
+vlog -sv rtl/axil_if.sv
 
 # Compile the design and testbench
 vlog -sv rtl/axil_decoder_addr_wr.sv
@@ -34,8 +38,6 @@ vsim -t 1ns -L altera_mf_ver -voptargs="+acc" axil_interconnect_tb
 # Add signals to the waveform window
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_sv_inst/aclk
 add wave -radix binary              axil_interconnect_tb/axil_interconnect_wrapper_sv_inst/aresetn
-
-
 
 # Loop to add master write signals
 for {set i 0} {$i < $NUMBER_MASTER} {incr i} {
