@@ -6392,3 +6392,6 @@ do tb/vsim/vsim.do
 # /home/maxim/Quartus/questa_fse/linux_x86_64/vlog failed.
 #     while executing
 # "vlog -sv tb/axil_interconnect_tb.sv"
+quit
+# End time: 11:41:15 on Jul 31,2024, Elapsed time: 20:18:47
+# Errors: 360, Warnings: 48

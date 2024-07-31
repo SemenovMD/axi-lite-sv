@@ -46,7 +46,7 @@ module axil_interconnect_wr
     logic   [NUMBER_MASTER-1:0]                 slv_select_wire_tr      [NUMBER_SLAVE+1];
 
     logic   [NUMBER_MASTER-1:0]                 grant_wr_wire           [NUMBER_SLAVE+1];
-    logic   [NUMBER_SLAVE+1:0]                  grant_wr_wire_tr        [NUMBER_MASTER];
+    logic   [NUMBER_SLAVE:0]                  	grant_wr_wire_tr        [NUMBER_MASTER];
 
     logic   [$clog2(NUMBER_MASTER)-1:0]         grant_wr_cdr_wire       [NUMBER_SLAVE+1];
     logic   [$clog2(NUMBER_SLAVE+1)-1:0]        grant_wr_cdr_wire_tr    [NUMBER_MASTER];   
