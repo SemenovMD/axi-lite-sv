@@ -11,11 +11,6 @@ module axis_uart_transceiver
     input   logic                               uart_rx,
     output  logic                               uart_tx,
 
-    // Flag State
-    output  logic                               tx_done,
-    output  logic                               rx_done,
-    output  logic [1:0]                         rx_error,
-
     // Interface
     axis_if_uart.m_axis                         m_axis,
     axis_if_uart.s_axis                         s_axis

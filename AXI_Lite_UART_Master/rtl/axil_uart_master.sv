@@ -42,7 +42,7 @@ module axil_uart_master
             m_axil.awaddr       <= '0;
             m_axil.awvalid      <= 0;
             m_axil.wdata        <= '0;
-            m_axil.wstrb        <= 4'hF;
+            m_axil.wstrb        <= 4'h0;
             m_axil.wvalid       <= 0;
             m_axil.bready       <= 0;
 
@@ -72,22 +72,29 @@ module axil_uart_master
                     end
                 HAND_AXIS_SLV:
                     begin
-                        if (data_slv[AXI_DATA_WIDTH_UART-1])
-                        begin
-                            state_uart_master <= IDLE_AXIL_WR;
-                        end else
-                        begin
-                            state_uart_master <= IDLE_AXIL_RD;
-                        end
+                        case (data_slv[7:4])
+                            UART_MASTER_CODE_WR: 
+                                begin
+                                    state_uart_master <= IDLE_AXIL_WR;
+                                end
+                            UART_MASTER_CODE_RD: 
+                                begin
+                                    state_uart_master <= IDLE_AXIL_RD;
+                                end
+                            default: 
+                                begin
+                                    state_uart_master <= IDLE_AXIS_SLV;
+                                end
+                        endcase
 
                         s_axis.tready <= 0;
                     end
                 IDLE_AXIL_WR:
                     begin
                         state_uart_master <= RESP_AXIL_WR;
-                        m_axil.awaddr <= data_slv[31:0];
+                        m_axil.awaddr <= data_slv[39:8];
                         m_axil.awvalid <= 1;
-                        m_axil.wdata <= data_slv[63:32];
+                        m_axil.wdata <= data_slv[71:40];
                         m_axil.wstrb <= 4'hF;
                         m_axil.wvalid <= 1;
                     end
@@ -133,16 +140,22 @@ module axil_uart_master
                         begin
                             state_uart_master <= IDLE_AXIS_MSTR;
                             m_axil.bready <= 0;
-                            data_mstr[71] <= 1;
-                            data_mstr[70:69] <= m_axil.bresp;
-                            data_mstr[68:64] <= UART_MASTER_CODE_WR;
-                            data_mstr[63:0] <= data_slv[63:0];
+                            data_mstr[71:8] <= data_slv[71:8];
+                            data_mstr[7:4] <= UART_MASTER_CODE_WR;
+
+                            if (~|m_axil.bresp)
+                            begin
+                                data_mstr[3:0] <= 4'h0;
+                            end else
+                            begin
+                                data_mstr[3:0] <= 4'hF;
+                            end
                         end
                     end
                 IDLE_AXIL_RD:
                     begin
                         state_uart_master <= RESP_AXIL_RD;
-                        m_axil.araddr <= data_slv[31:0];
+                        m_axil.araddr <= data_slv[39:8];
                         m_axil.arvalid <= 1;
                     end
                 RESP_AXIL_RD:
@@ -166,11 +179,18 @@ module axil_uart_master
                         end else
                         begin
                             state_uart_master <= IDLE_AXIS_MSTR;
-                            data_mstr[71] <= 0;
-                            data_mstr[70:69] <= m_axil.rresp;
-                            data_mstr[68:64] <= UART_MASTER_CODE_RD;
-                            data_mstr[63:32] <= m_axil.rdata;
-                            data_mstr[31:0] <= data_slv[31:0];
+                            data_mstr[71:40] <= m_axil.rdata;
+                            data_mstr[39:8] <= data_slv[39:8];
+                            data_mstr[7:4] <= UART_MASTER_CODE_RD;
+
+                            if (~|m_axil.rresp)
+                            begin
+                                data_mstr[3:0] <= 4'h0;
+                            end else
+                            begin
+                                data_mstr[3:0] <= 4'hF;
+                            end
+
                             m_axil.rready <= 0;
                         end
                     end

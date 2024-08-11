@@ -25,15 +25,4 @@ module axil_uart_master_wrapper_sv
         .m_axil(m_axil)
     );
 
-    axis_uart_transceiver axis_uart_transceiver
-
-    (
-        .aclk(aclk),
-        .aresetn(aresetn),
-        .uart_rx(uart_rx),
-        .uart_tx(uart_tx),
-        .m_axis(m_axis),
-        .s_axis(s_axis)
-    );
-
 endmodule
