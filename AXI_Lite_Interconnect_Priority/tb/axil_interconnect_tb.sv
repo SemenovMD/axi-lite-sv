@@ -164,81 +164,9 @@ module axil_interconnect_tb;
         #100 aresetn = 1; 
     end
 
-    //initial begin
-    //    // Initialize Master Write Interfaces
-    //    for (int i = 0; i < NUMBER_SLAVE; i++) 
-    //    begin
-    //        m_axil[i].awaddr = '0;
-    //        m_axil[i].awvalid = 0;
-    //        m_axil[i].wdata = '0;
-    //        m_axil[i].wstrb = '0;
-    //        m_axil[i].wvalid = 0;
-    //        m_axil[i].bready = 0;
-    //    end
-//
-    //    // Initialize Slave Write Interfaces
-    //    for (int i = 0; i < NUMBER_MASTER; i++) 
-    //    begin
-    //        s_axil[i].awready = '0;
-    //        s_axil[i].wready = 0;
-    //        s_axil[i].bresp = '0;
-    //        s_axil[i].bvalid = 0;
-    //    end
-//
-    //    // Initialize Master Read Interfaces
-    //    for (int i = 0; i < NUMBER_SLAVE; i++) 
-    //    begin
-    //        m_axil[i].araddr = '0;
-    //        m_axil[i].arvalid = 0;
-    //        m_axil[i].rready = 0;
-    //    end
-//
-    //    // Initialize Slave Read Interfaces
-    //    for (int i = 0; i < NUMBER_MASTER; i++) 
-    //    begin
-    //        s_axil[i].arready = 0;
-    //        s_axil[i].rdata = '0;
-    //        s_axil[i].rvalid = '0;
-    //        s_axil[i].rresp = '0;
-    //    end
-    //end
-
-    AXI_Lite_Master_Write   master_wr  [NUMBER_MASTER];
-    AXI_Lite_Slave_Write    slave_wr   [NUMBER_SLAVE];
-
-    AXI_Lite_Master_Read    master_rd  [NUMBER_MASTER];
-    AXI_Lite_Slave_Read     slave_rd   [NUMBER_SLAVE];
-
     initial 
     begin
-        for (int i = 0; i < NUMBER_MASTER; i++) 
-        begin
-            master_wr[i] = new();
-            master_rd[i] = new();           
-        end
-
-        for (int j = 0; j < NUMBER_SLAVE; j++) 
-        begin
-            slave_wr[j] = new();
-            slave_rd[j] = new();
-        end
-
-        #100;
-
-        fork
-            for (int i = 0; i < NUMBER_MASTER; i++)
-            begin
-                master_wr[i].run();
-                master_rd[i].run();
-            end
-
-            for (int j = 0; j < NUMBER_SLAVE; j++)
-            begin
-                slave_wr[j].run();
-                slave_rd[j].run();
-            end
-        join
-
+        #1000;
         $finish;
     end
 
