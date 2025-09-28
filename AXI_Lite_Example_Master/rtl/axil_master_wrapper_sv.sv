@@ -52,29 +52,31 @@ module axil_master_wrapper_sv
 
     axil_if #(.AXI_DATA_WIDTH(AXI_DATA_WIDTH), .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)) m_axil();
 
-    assign m_axil.awaddr  = m_axil_awaddr;
-    assign m_axil.awvalid = m_axil_awvalid;
-    assign m_axil_awready = m_axil.awready;
-    
-    assign m_axil.wdata   = m_axil_wdata;
-    assign m_axil.wstrb   = m_axil_wstrb;
-    assign m_axil.wvalid  = m_axil_wvalid;
-    assign m_axil_wready  = m_axil.wready;
-    
-    assign m_axil_bresp   = m_axil.bresp;
-    assign m_axil_bvalid  = m_axil.bvalid;
-    assign m_axil.bready  = m_axil.bready;
-    
-    assign m_axil.araddr  = m_axil_araddr;
-    assign m_axil.arvalid = m_axil_arvalid;
-    assign m_axil_arready = m_axil.arready;
-    
-    assign m_axil_rdata   = m_axil.rdata;
-    assign m_axil_rresp   = m_axil.rresp;
-    assign m_axil_rvalid  = m_axil.rvalid;
-    assign m_axil.rready  = m_axil.rready;
+    generate 
+        assign m_axil_awaddr  = m_axil.awaddr;
+        assign m_axil_awvalid = m_axil.awvalid;
+        assign m_axil.awready = m_axil_awready;
+        
+        assign m_axil_wdata   = m_axil.wdata;
+        assign m_axil_wstrb   = m_axil.wstrb;
+        assign m_axil_wvalid  = m_axil.wvalid;
+        assign m_axil.wready  = m_axil_wready;
+        
+        assign m_axil.bresp   = m_axil_bresp;
+        assign m_axil.bvalid  = m_axil_bvalid;
+        assign m_axil_bready  = m_axil.bready;
+        
+        assign m_axil_araddr  = m_axil.araddr;
+        assign m_axil_arvalid = m_axil.arvalid;
+        assign m_axil.arready = m_axil_arready;
+        
+        assign m_axil.rdata   = m_axil_rdata;
+        assign m_axil.rresp   = m_axil_rresp;
+        assign m_axil.rvalid  = m_axil_rvalid;
+        assign m_axil_rready  = m_axil.rready;
+    endgenerate
 
-    axil_master axil_master_inst
+    axil_master #(.AXI_DATA_WIDTH(AXI_DATA_WIDTH), .AXI_ADDR_WIDTH(AXI_ADDR_WIDTH)) axil_master_inst
     (
         .aclk(aclk),
         .aresetn(aresetn),

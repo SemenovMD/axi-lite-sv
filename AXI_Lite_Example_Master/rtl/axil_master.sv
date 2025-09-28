@@ -1,5 +1,10 @@
 module axil_master
 
+#(
+    parameter   AXI_DATA_WIDTH  = 32,
+    parameter   AXI_ADDR_WIDTH  = 32
+)
+
 (
 	input   logic                           aclk,
 	input   logic                           aresetn,

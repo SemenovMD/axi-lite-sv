@@ -38,32 +38,33 @@ add wave -radix hexadecimal     axil_master_tb/rd_data
 add wave -radix binary          axil_master_tb/rd_done
 add wave -radix hexadecimal     axil_master_tb/rd_error
 
-add wave -divider "AXI-Lite Master Interface"
-add wave -radix hexadecimal 	axil_master_tb/s_axil_awaddr
-add wave -radix binary 		    axil_master_tb/s_axil_awvalid
-add wave -radix binary 		    axil_master_tb/s_axil_awready
-add wave -radix hexadecimal     axil_master_tb/s_axil_wdata
-add wave -radix hexadecimal     axil_master_tb/s_axil_wstrb
-add wave -radix binary          axil_master_tb/s_axil_wvalid
-add wave -radix binary          axil_master_tb/s_axil_wready
-add wave -radix hexadecimal     axil_master_tb/s_axil_bresp
-add wave -radix binary          axil_master_tb/s_axil_bvalid
-add wave -radix binary          axil_master_tb/s_axil_bready
+add wave -divider "AXI-Lite Master Interface WRITE"
+add wave -radix hexadecimal 	axil_master_tb/s_axil/awaddr
+add wave -radix binary 		    axil_master_tb/s_axil/awvalid
+add wave -radix binary 		    axil_master_tb/s_axil/awready
+add wave -radix hexadecimal     axil_master_tb/s_axil/wdata
+add wave -radix hexadecimal     axil_master_tb/s_axil/wstrb
+add wave -radix binary          axil_master_tb/s_axil/wvalid
+add wave -radix binary          axil_master_tb/s_axil/wready
+add wave -radix hexadecimal     axil_master_tb/s_axil/bresp
+add wave -radix binary          axil_master_tb/s_axil/bvalid
+add wave -radix binary          axil_master_tb/s_axil/bready
 
-add wave -radix hexadecimal 	axil_master_tb/s_axil_araddr
-add wave -radix binary 		    axil_master_tb/s_axil_arvalid
-add wave -radix binary 		    axil_master_tb/s_axil_arready
-add wave -radix hexadecimal     axil_master_tb/s_axil_rdata
-add wave -radix binary          axil_master_tb/s_axil_rvalid
-add wave -radix binary          axil_master_tb/s_axil_rready
-add wave -radix hexadecimal     axil_master_tb/s_axil_rresp
+add wave -divider "AXI-Lite Master Interface READ"
+add wave -radix hexadecimal 	axil_master_tb/s_axil/araddr
+add wave -radix binary 		    axil_master_tb/s_axil/arvalid
+add wave -radix binary 		    axil_master_tb/s_axil/arready
+add wave -radix hexadecimal     axil_master_tb/s_axil/rdata
+add wave -radix binary          axil_master_tb/s_axil/rvalid
+add wave -radix binary          axil_master_tb/s_axil/rready
+add wave -radix hexadecimal     axil_master_tb/s_axil/rresp
 
 add wave -divider "DUT Internal States"
-add wave -radix binary          axil_master_tb/dut/axil_master_inst/state_wr
-add wave -radix binary          axil_master_tb/dut/axil_master_inst/state_rd
+add wave -radix binary          axil_master_tb/axil_master_inst/state_wr
+add wave -radix binary          axil_master_tb/axil_master_inst/state_rd
 
 # Run the simulation for the specified time
-run 10ms
+run 1ms
 
 # Zoom out to show all waveform data
 wave zoom full
