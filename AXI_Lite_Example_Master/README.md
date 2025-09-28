@@ -42,7 +42,10 @@ make clean
 Интерфейс AXI-Lite для подключения к внешней шине.
 
 ### `axil_master_wrapper_sv`
-Промежуточная оболочка на SystemVerilog для удобного использования в блок дизайне.
+Промежуточная оболочка на SystemVerilog для последующей обертки в Verilog.
+
+### `axil_master_wrapper_v`
+Оболочка на Verilog для удобного использования в блок дизайне (IP Integrator).
 
 ### `axil_master_tb`
 Тестбенч для проверки работы модуля, включая генерацию AXI-Lite транзакций и эмуляцию AXI-Lite Slave.
