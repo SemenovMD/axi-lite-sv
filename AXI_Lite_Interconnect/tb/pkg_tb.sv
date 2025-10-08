@@ -146,7 +146,6 @@ package pkg_tb;
             end
         endtask
         
-        // Функция для получения статистики
         function void get_stats();
             $display("Master[%0d] Read Statistics:  %0d transactions", 
                     master_id, read_transaction_count);
