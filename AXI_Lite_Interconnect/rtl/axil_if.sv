@@ -2,6 +2,10 @@ interface axil_if;
 
     import axil_pkg ::*;
 
+    // Global Singals
+    logic                               aclk;
+    logic                               aresetn;
+
     // Channel Write Address
     logic   [AXI_ADDR_WIDTH-1:0]        awaddr;
     logic                               awvalid;
