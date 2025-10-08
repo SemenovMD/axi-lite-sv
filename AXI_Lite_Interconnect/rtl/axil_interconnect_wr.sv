@@ -80,8 +80,8 @@ module axil_interconnect_wr
     endgenerate
 
     generate
-        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_arbiter_priority_wr
-            axil_arbiter_priority_wr axil_arbiter_priority_wr_inst
+        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_arbiter_wr
+            axil_arbiter_wr axil_arbiter_wr_inst
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -93,7 +93,7 @@ module axil_interconnect_wr
         end
     endgenerate
 
-    axil_arbiter_priority_wr axil_arbiter_priority_wr_inst_invalid
+    axil_arbiter_wr axil_arbiter_wr_inst_invalid
     (
         .aclk(aclk),
         .aresetn(aresetn),

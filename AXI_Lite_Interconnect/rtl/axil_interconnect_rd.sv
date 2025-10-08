@@ -69,8 +69,8 @@ module axil_interconnect_rd
     endgenerate
 
     generate
-        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_arbiter_rr_rd
-            axil_arbiter_rr_rd axil_arbiter_rr_rd_inst
+        for (i = 0; i < NUMBER_SLAVE; i++) begin : axil_arbiter_rd
+            axil_arbiter_rd axil_arbiter_rd_inst
             (
                 .aclk(aclk),
                 .aresetn(aresetn),
@@ -82,7 +82,7 @@ module axil_interconnect_rd
         end
     endgenerate
 
-    axil_arbiter_rr_rd axil_arbiter_rr_rd_inst
+    axil_arbiter_rd axil_arbiter_rd_inst
     (
         .aclk(aclk),
         .aresetn(aresetn),
