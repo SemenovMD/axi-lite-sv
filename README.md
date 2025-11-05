@@ -22,7 +22,7 @@
 - [AXI_Lite_Example_Slave/](AXI_Lite_Example_Slave/) — пример слейва AXI‑Lite.
 - [AXI_Lite_UART_Master/](AXI_Lite_UART_Master/) — UART Master AXI‑Lite.
 - [AXI_Lite_Interconnect/](AXI_Lite_Interconnect/) — интерконнект AXI-Lite (RR/Priority).
-- [AXI_Lite_To_AXI_Stream_Converter/](AXI_Lite_To_AXI_Stream_Converter/) — конвертер AXI‑Lite → AXI‑Stream.
+- [AXI_Lite_To_Stream_Converter/](AXI_Lite_To_Stream_Converter/) — конвертер AXI‑Lite → AXI‑Stream.
 
 Базовые интерфейсы:
 - `axil_if.sv` — интерфейс AXI‑Lite.
@@ -40,7 +40,7 @@
 - [AXI_Lite_Example_Slave/README.md](AXI_Lite_Example_Slave/README.md)
 - [AXI_Lite_UART_Master/README.md](AXI_Lite_UART_Master/README.md)
 - [AXI_Lite_Interconnect/README.md](AXI_Lite_Interconnect/README.md)
-- [AXI_Lite_To_AXI_Stream_Converter/README.md](AXI_Lite_To_AXI_Stream_Converter/README.md)
+- [AXI_Lite_To_Stream_Converter/README.md](AXI_Lite_To_Stream_Converter/README.md)
 
 ## Лицензия
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  
