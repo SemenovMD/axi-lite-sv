@@ -1,0 +1,5 @@
+Report for Mode 3:
+  Response Summary:
+    OKAY: 32
+    DECERR: 0
+    ERROR: 0

@@ -30,7 +30,6 @@ module axis_uart_parser_gen
 
     logic   [1:0]   count_byte_parser;
     logic   [3:0]   count_byte_generator;
-    logic   [15:0]  count_delay;
 
     logic   [31:0]  parser_addr;
     logic   [31:0]  parser_data;
@@ -138,10 +137,9 @@ module axis_uart_parser_gen
     //////////////////////////////////////////////////////////////////////////////////
     // FSM UART Generator Frame
     //////////////////////////////////////////////////////////////////////////////////
-    typedef enum logic [1:0]
+    typedef enum logic
     {  
         UART_GENERATOR_WAIT,
-        UART_GENERATOR_DELAY,
         UART_GENERATOR_FRAME
     } state_generator_type;
 
@@ -155,7 +153,6 @@ module axis_uart_parser_gen
             gen_rd_ready <= 1'b0;
             gen_wr_ready <= 1'b0;
             count_byte_generator <= 4'd0;
-            count_delay <= 16'd0;
         end else begin
             case (state_generator)
                 UART_GENERATOR_WAIT:
@@ -167,7 +164,7 @@ module axis_uart_parser_gen
                                 end
                             2'b01:
                                 begin
-                                    state_generator <= UART_GENERATOR_DELAY;
+                                    state_generator <= UART_GENERATOR_FRAME;
                                     gen_rd_ready <= 1'b1;
                                     gen_addr <= rd_addr;
                                     gen_data <= gen_rd_data;
@@ -176,7 +173,7 @@ module axis_uart_parser_gen
                                 end 
                             2'b10, 2'b11:
                                 begin
-                                    state_generator <= UART_GENERATOR_DELAY;
+                                    state_generator <= UART_GENERATOR_FRAME;
                                     gen_wr_ready <= 1'b1;
                                     gen_addr <= wr_addr;
                                     gen_data <= wr_data;
@@ -185,20 +182,10 @@ module axis_uart_parser_gen
                                 end
                         endcase
                     end
-                UART_GENERATOR_DELAY:
-                    begin
-                        if (~&count_delay) begin
-                            count_delay <= count_delay + 1'b1;
-                        end else begin
-                            state_generator <= UART_GENERATOR_FRAME;
-                            count_delay <= 16'd0;
-                        end
-
-                        gen_rd_ready <= 1'b0;
-                        gen_wr_ready <= 1'b0;
-                    end
                 UART_GENERATOR_FRAME:
                     begin
+                        gen_rd_ready <= 1'b0;
+                        gen_wr_ready <= 1'b0;
                         m_axis.tvalid <= 1'b1;
                         m_axis.tdata <= gen_frame[87 - count_byte_generator*8 -: 8];
 
