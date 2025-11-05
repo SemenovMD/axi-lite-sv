@@ -70,7 +70,7 @@ START(1B) | ADDR(4B) | DATA(4B) | RESP(1B) | CMD(1B)
 ## Документация
 
 ### `axil_uart_master`
-Основной модуль UART Master под управлением AXI-Lite.
+Основной модуль UART Master AXI-Lite.
 
 ### `axil_uart_master_wrapper_sv`
 SystemVerilog обертка для интеграции верхнего модуля.
