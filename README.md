@@ -12,7 +12,7 @@
 
 ## Особенности
 - Полная поддержка AXI‑Lite (каналы AW/W/B и AR/R).
-- Эталонные примеры: Master/Slave, GPIO, RAM/ROM, UART Master.
+- Эталонные примеры: Master/Slave, UART Master.
 - Интерконнект (Round‑Robin/Priority арбитраж, декод адресов, кроссбар).
 - Конвертеры: AXI‑Lite → AXI‑Stream.
 - Тестовое окружение, make‑скрипты, python‑утилиты.
@@ -20,8 +20,6 @@
 ## Структура репозитория
 - [AXI_Lite_Example_Master/](AXI_Lite_Example_Master/) — пример мастера AXI‑Lite.
 - [AXI_Lite_Example_Slave/](AXI_Lite_Example_Slave/) — пример слейва AXI‑Lite.
-- [AXI_LIte_RAM/](AXI_LIte_RAM/) — пример RAM AXI‑Lite.
-- [AXI_Lite_ROM/](AXI_Lite_ROM/) — пример ROM AXI‑Lite.
 - [AXI_Lite_UART_Master/](AXI_Lite_UART_Master/) — UART Master AXI‑Lite.
 - [AXI_Lite_Interconnect/](AXI_Lite_Interconnect/) — интерконнект AXI-Lite (RR/Priority).
 - [AXI_Lite_To_AXI_Stream_Converter/](AXI_Lite_To_AXI_Stream_Converter/) — конвертер AXI‑Lite → AXI‑Stream.
@@ -40,9 +38,6 @@
 ## Документация по модулям
 - [AXI_Lite_Example_Master/README.md](AXI_Lite_Example_Master/README.md)
 - [AXI_Lite_Example_Slave/README.md](AXI_Lite_Example_Slave/README.md)
-- [AXI_Lite_GPIO/README.md](AXI_Lite_GPIO/README.md)
-- [AXI_LIte_RAM/README.md](AXI_LIte_RAM/README.md)
-- [AXI_Lite_ROM/README.md](AXI_Lite_ROM/README.md)
 - [AXI_Lite_UART_Master/README.md](AXI_Lite_UART_Master/README.md)
 - [AXI_Lite_Interconnect/README.md](AXI_Lite_Interconnect/README.md)
 - [AXI_Lite_To_AXI_Stream_Converter/README.md](AXI_Lite_To_AXI_Stream_Converter/README.md)
