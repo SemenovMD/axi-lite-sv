@@ -73,25 +73,25 @@ START(1B) | ADDR(4B) | DATA(4B) | RESP(1B) | CMD(1B)
 Основной модуль UART Master AXI-Lite.
 
 ### `axil_uart_master_wrapper_sv`
-SystemVerilog обертка для интеграции верхнего модуля.
+Промежуточная оболочка на SystemVerilog для последующей обертки в Verilog.
 
 ### `axil_uart_master_wrapper_v`
-Verilog обертка для проектов/IP, требующих Verilog.
+Оболочка на Verilog для удобного использования в блок дизайне (IP Integrator).
 
 ### `axis_uart`
-Приемопередатчик UART на AXI-Stream.
+Приемопередатчик UART AXI-Stream.
 
 ### `axis_uart_rx`
-Приемник UART с AXI-Stream выходом.
+Приемник UART AXI-Stream.
 
 ### `axis_uart_tx`
-Передатчик UART с AXI-Stream входом.
+Передатчик UART AXI-Stream.
 
 ### `axis_uart_parser_gen`
-Парсер/генератор UART-кадров на AXI-Stream.
+Парсер/генератор UART-кадров AXI-Stream.
 
 ### `axil_if`
-Интерфейс AXI-Lite.
+Интерфейс AXI-Lite для подключения к внешней шине.
 
 ### `axis_if`
-Интерфейс AXI-Stream.
+Интерфейс AXI-Stream для подключения к внешней шине.
