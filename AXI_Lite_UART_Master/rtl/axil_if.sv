@@ -1,6 +1,7 @@
 interface axil_if;
 
-    import axil_pkg ::*;
+    parameter   AXI_DATA_WIDTH  = 32;
+    parameter   AXI_ADDR_WIDTH  = 32;
 
     // Channel Write Address
     logic   [AXI_ADDR_WIDTH-1:0]        awaddr;

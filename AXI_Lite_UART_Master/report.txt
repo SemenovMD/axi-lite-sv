@@ -1,6 +1,0 @@
-Report for Mode 2:
-  Total:
-    Response:
-      OKAY: 56
-      DECERR: 64
-      ERROR: 0

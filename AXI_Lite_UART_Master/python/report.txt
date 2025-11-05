@@ -1,0 +1,7 @@
+Report for Mode 3:
+  Transmitted frames: 4
+  Received frames: 2
+  Response Summary:
+    OKAY: 0
+    DECERR: 0
+    ERROR: 4

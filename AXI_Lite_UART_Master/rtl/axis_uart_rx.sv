@@ -1,249 +1,108 @@
 module axis_uart_rx
 
-    import axil_pkg ::*;
+#(
+    parameter   CLOCK       = 100_000_000,
+    parameter   BAUD_RATE   = 115_200
+)
 
 (
-    // Global signals
-    input   logic                               aclk,
-    input   logic                               aresetn,
+    input   logic   aclk,
+    input   logic   aresetn,
 
-    // Receiver
-    input   logic                               uart_rx,
+    input   logic   uart_rx,
 
-    // Interface
-    axis_if_uart.m_axis                         m_axis
+    axis_if.m_axis  m_axis
 );
 
     localparam COUNT_SPEED  = CLOCK/BAUD_RATE;
 
     logic [$clog2(COUNT_SPEED)-1:0]     count_baud;
-    logic [$clog2(COUNT_SPEED)-1:0]     count_delay;   
     logic [2:0]                         count_bit;
-    logic [3:0]                         count_byte;
-
-    logic [71:0]                        uart_buf;
-    logic [71:0]                        uart_reg;   
+    logic [7:0]                         uart_buf;
+    logic [7:0]                         uart_reg;
 
     logic [2:0]                         majority_in;
     logic                               majority_out;
 
     logic                               flag;
 
-    // Конечный автомат UART приемника
-    typedef enum logic [2:0]
+    // FSM UART_RX
+    typedef enum logic [1:0]
     {  
-        IDLE_UART,
-        HEADER_UART_START,
-        HEADER_UART_DATA,
-        HEADER_UART_STOP,
-        DATA_UART_START,
-        DATA_UART_DATA,
-        DATA_UART_STOP_1,
-        DATA_UART_STOP_2
+        UART_RX_IDLE,
+        UART_RX_START,
+        UART_RX_DATA,
+        UART_RX_STOP
     } state_type_uart_rx;
 
-    state_type_uart_rx state_uart;
+    state_type_uart_rx state_rx;
 
-    always_ff @(posedge aclk)
-    begin
-        if (!aresetn)
-        begin
-            state_uart <= IDLE_UART;
-            uart_buf <= '0;
-            uart_reg <= '0;
+    always_ff @(posedge aclk) begin
+        if (!aresetn) begin
+            state_rx <= UART_RX_IDLE;
             count_baud <= '0;
-            count_delay <= '0;
             count_bit <= '0;
-            count_byte <= '0;
-            flag <= 0;
-        end else
-        begin
-            case (state_uart)
-                IDLE_UART:
+            flag <= 1'd0;
+        end else begin
+            case (state_rx)
+                UART_RX_IDLE:
                     begin
-                        if (uart_rx)
-                        begin
-                            state_uart <= IDLE_UART;
-                        end else
-                        begin
-                            state_uart <= HEADER_UART_START;
+                        if (uart_rx) begin
+                            state_rx <= UART_RX_IDLE;
+                        end else begin
+                            state_rx <= UART_RX_START;
                         end
 
-                        flag <= 0;
-                        uart_buf <= '0;
+                        flag <= 1'd0;
                     end
-                HEADER_UART_START:
+                UART_RX_START:
                     begin
-                        if (count_baud < COUNT_SPEED - 1)
-                        begin
-                            state_uart <= HEADER_UART_START;
-                            count_baud <= count_baud + 1;    
-                        end else
-                        begin
+                        if (count_baud < COUNT_SPEED - 2'd2) begin
+                            count_baud <= count_baud + 1'd1;
+                        end else begin
                             count_baud <= '0;
-
-                            if (!majority_out)
-                            begin
-                                state_uart <= HEADER_UART_DATA;
-                            end else
-                            begin
-                                state_uart <= IDLE_UART;
+                            
+                            if (majority_out) begin
+                                state_rx <= UART_RX_IDLE;
+                            end else begin
+                                state_rx <= UART_RX_DATA;
                             end
                         end
                     end
-                HEADER_UART_DATA:
+                UART_RX_DATA:
                     begin
-                        if (!((count_baud == COUNT_SPEED - 1) && (count_bit == 8 - 1)))
-                        begin
-                            if (count_baud < COUNT_SPEED - 1)
-                            begin
-                                state_uart <= HEADER_UART_DATA;
-                                count_baud <= count_baud + 1;
-                            end else
-                            begin
-                                state_uart <= HEADER_UART_DATA;
+                        if (!((count_baud == COUNT_SPEED - 1'd1) && (count_bit == 3'd7))) begin
+                            if (count_baud < COUNT_SPEED - 1) begin
+                                count_baud <= count_baud + 1'd1;
+                            end else begin
                                 count_baud <= '0;
-                                count_bit <= count_bit + 1;
+                                count_bit <= count_bit + 1'd1;
                             end
-                        end else
-                        begin
-                            state_uart <= HEADER_UART_STOP;
+                        end else begin
+                            state_rx <= UART_RX_STOP;
                             count_baud <= '0;
                             count_bit <= '0;
                         end
 
-                        if (count_baud == (COUNT_SPEED/2 + 2))
-                        begin
-                            case (count_bit)
-                                0: uart_buf[0] <= majority_out;
-                                1: uart_buf[1] <= majority_out;
-                                2: uart_buf[2] <= majority_out;
-                                3: uart_buf[3] <= majority_out;
-                                4: uart_buf[4] <= majority_out;
-                                5: uart_buf[5] <= majority_out;
-                                6: uart_buf[6] <= majority_out;
-                                7: uart_buf[7] <= majority_out;                                                         
-                            endcase
+                        if (count_baud == (COUNT_SPEED/2 + 2'd2)) begin
+                            uart_buf[count_bit] <= majority_out;
+                        end else begin
+                            uart_buf <= uart_buf;
                         end
                     end
-                HEADER_UART_STOP:
+                UART_RX_STOP:
                     begin
-                        if (count_baud < COUNT_SPEED - 1)
-                        begin
-                            state_uart <= HEADER_UART_STOP;
-                            count_baud <= count_baud + 1;    
-                        end else
-                        begin
+                        if (count_baud < COUNT_SPEED - 1'd1) begin
+                            count_baud <= count_baud + 1'd1;
+                        end else begin
+                            state_rx <= UART_RX_IDLE;
                             count_baud <= '0;
 
-                            if (majority_out)
-                            begin
-                                if (uart_buf[7:0] == HEADER_UART)
-                                begin
-                                    state_uart <= DATA_UART_START;
-                                    uart_buf <= '0;
-                                end else
-                                begin
-                                    state_uart <= IDLE_UART;
-                                end
-                            end else
-                            begin
-                                state_uart <= IDLE_UART;
-                            end
-                        end
-                    end
-                DATA_UART_START:
-                    begin
-                        if (count_baud < COUNT_SPEED - 1)
-                        begin
-                            state_uart <= DATA_UART_START;
-                            count_baud <= count_baud + 1;    
-                        end else
-                        begin
-                            count_baud <= '0;
-
-                            if (!majority_out)
-                            begin
-                                state_uart <= DATA_UART_DATA;
-                            end else
-                            begin
-                                state_uart <= IDLE_UART;
-                            end
-                        end
-                    end
-                DATA_UART_DATA:
-                    begin
-                        if (!((count_baud == COUNT_SPEED - 1) && (count_bit == 8 - 1) && (count_byte == 9 - 1)))
-                        begin
-                            if (!((count_baud == COUNT_SPEED - 1) && (count_bit == 8 - 1)))
-                            begin
-                                if (count_baud < COUNT_SPEED - 1)
-                                begin
-                                    state_uart <= DATA_UART_DATA;
-                                    count_baud <= count_baud + 1; 
-                                end else
-                                begin
-                                    state_uart <= DATA_UART_DATA;
-                                    count_baud <= '0;
-                                    count_bit <= count_bit + 1;
-                                end
-                            end else
-                            begin
-                                state_uart <= DATA_UART_STOP_1;
-                                count_baud <= '0;
-                                count_bit <= '0;
-                                count_byte <= count_byte + 1;
-                            end
-                        end else
-                        begin
-                            state_uart <= DATA_UART_STOP_2;
-                            count_baud <= '0;
-                            count_bit <= '0;
-                            count_byte <= '0;
-                        end
-
-                        if (count_baud == (COUNT_SPEED/2 + 2))
-                        begin
-                            uart_buf[72 + 1*count_bit - 8*count_byte - 8] <= majority_out;
-                        end
-                    end
-                DATA_UART_STOP_1:
-                    begin
-                        if (count_baud < COUNT_SPEED - 1)
-                        begin
-                            state_uart <= DATA_UART_STOP_1;
-                            count_baud <= count_baud + 1;    
-                        end else
-                        begin
-                            count_baud <= '0;
-
-                            if (majority_out)
-                            begin
-                                state_uart <= DATA_UART_START;
-                            end else
-                            begin
-                                state_uart <= IDLE_UART;
-                            end
-                        end
-                    end
-                DATA_UART_STOP_2:
-                    begin
-                        if (count_baud < COUNT_SPEED - 1)
-                        begin
-                            state_uart <= DATA_UART_STOP_2;
-                            count_baud <= count_baud + 1;
-                        end else
-                        begin
-                            count_baud <= '0;
-
-                            if (majority_out)
-                            begin
-                                state_uart <= IDLE_UART;
-                                flag <= 1;
+                            if (!majority_out) begin
+                                flag <= 1'd0;
+                            end else begin
+                                flag <= 1'd1;
                                 uart_reg <= uart_buf;
-                            end else
-                            begin
-                                state_uart <= IDLE_UART;
                             end
                         end
                     end
@@ -251,33 +110,29 @@ module axis_uart_rx
         end
     end
 
-    // Мажоритарный элемент
-    always_ff @(posedge aclk)
-    begin
-        if (!aresetn)
-        begin
+    // Majority Element
+    always_ff @(posedge aclk) begin
+        if (!aresetn) begin
             majority_in <= '0;
-        end else
-        begin
+        end else begin
             case (count_baud)
-                COUNT_SPEED/2 - 1: majority_in[0] <= uart_rx;
-                COUNT_SPEED/2    : majority_in[1] <= uart_rx;
-                COUNT_SPEED/2 + 1: majority_in[2] <= uart_rx;
-                default:           majority_in    <= majority_in;
+                COUNT_SPEED/2 - 1'd1: majority_in[0] <= uart_rx;
+                COUNT_SPEED/2       : majority_in[1] <= uart_rx;
+                COUNT_SPEED/2 + 1'd1: majority_in[2] <= uart_rx;
+                default:              majority_in    <= majority_in;
             endcase
         end
     end
 
-    always_comb 
-    begin
+    always_comb begin
         case (majority_in)
-            3'b000, 3'b001, 3'b010, 3'b100: majority_out = 0;
-            3'b011, 3'b101, 3'b110, 3'b111: majority_out = 1;
+            3'b000, 3'b001, 3'b010, 3'b100: majority_out = 1'd0;
+            3'b011, 3'b101, 3'b110, 3'b111: majority_out = 1'd1;
         endcase
     end
 
-    // Конечный автомат AXI-Stream Master
-    typedef enum logic 
+    // FSM AXI-Stream
+    typedef enum logic
     {  
         IDLE_WR,
         HAND_WR
@@ -285,38 +140,31 @@ module axis_uart_rx
 
     state_type_wr state_wr;
 
-    always_ff @(posedge aclk)
-    begin
-        if (!aresetn)
-        begin
+    always_ff @(posedge aclk) begin
+        if (!aresetn) begin
             state_wr <= IDLE_WR;
+            m_axis.tvalid <= 1'd0;
             m_axis.tdata <= '0;
-            m_axis.tvalid <= 0;
-        end else
-        begin
+        end else begin
             case (state_wr)
                 IDLE_WR:
                     begin
-                        if (!flag)
-                        begin
+                        if (!flag) begin
                             state_wr <= IDLE_WR;
-                        end else
-                        begin
+                        end else begin
                             state_wr <= HAND_WR;
                             m_axis.tdata <= uart_reg;
-                            m_axis.tvalid <= 1;
+                            m_axis.tvalid <= 1'd1;
                         end
                     end
                 HAND_WR:
                     begin
-                        if (!m_axis.tready)
-                        begin
+                        if (!m_axis.tready) begin
                             state_wr <= HAND_WR;
-                        end else
-                        begin
+                        end else begin
                             state_wr <= IDLE_WR;
                             m_axis.tdata <= '0;
-                            m_axis.tvalid <= 0;
+                            m_axis.tvalid <= 1'd0;
                         end
                     end
             endcase

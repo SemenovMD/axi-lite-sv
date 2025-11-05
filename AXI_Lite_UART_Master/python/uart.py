@@ -3,65 +3,86 @@ import time
 import random
 
 # Open serial port for data transmission
-ComPort = serial.Serial('/dev/ttyUSB1', baudrate=115200)
+ComPort = serial.Serial('/dev/ttyUSB0', baudrate=115200)
 
 # Define slaves with their ADDR_OFFSET and ADDR_RANGE
 slaves = [
-    {"offset": 0x10000000, "range": 0x000000FF},
-    {"offset": 0x30000000, "range": 0x0000000F},
-    {"offset": 0xF0000000, "range": 0x0000000F},
-    {"offset": 0xA0000000, "range": 0x0000000F}
+    {"offset": 0xc0000000, "range": 0x000000FF},
+    {"offset": 0xc2000000, "range": 0x000000FF}
 ]
 
 # Open files for recording transmitted, received, and decoded data
 with open("rx_data.txt", "w") as file_rx, open("tx_decoded_data.txt", "w") as file_tx_decoded, open("rx_decoded_data.txt", "w") as file_rx_decoded:
     # Write headers to the decoded data files with aligned columns
-    file_tx_decoded.write("№    |Header |Data    |Address |WR/RD\n")
-    file_rx_decoded.write("№    |Header |Data    |Address |WR/RD|Response\n")
+    file_tx_decoded.write("№    |Header |Address |Data    |WR/RD\n")
+    file_rx_decoded.write("№    |Header |Address |Data    |WR/RD|Response\n")
 
     def decode_frame(data_hex):
         """
-        Decodes frame data and returns it as header, data, address, WR/RD, and response.
-        Expected frame structure:
-        - Header: 1 byte (2 characters)
-        - Data: 4 bytes (8 characters)
-        - Address: 4 bytes (8 characters)
-        - WR/RD and Response: 1 byte (2 characters)
+        Decodes frame data according to new structure:
+        TX: [1B Header][4B Address][4B Data][1B WR/RD] = 10 bytes = 20 hex chars
+        RX: [1B Header][4B Address][4B Data][1B Response][1B WR/RD] = 11 bytes = 22 hex chars
+        
+        Response decoding:
+        - Pre-last byte bits [1:0] = 00 -> OKAY
+        - Pre-last byte bits [1:0] = 11 -> DECERR  
+        - Other values -> ERROR
         """
-        header = data_hex[0:2]
-        data = data_hex[2:10]
-        address = data_hex[10:18]
-        codeword = data_hex[18:20]
+        if len(data_hex) == 20:  # TX frame (10 bytes)
+            header = data_hex[0:2]
+            address = data_hex[2:10]    # 4 bytes address
+            data_field = data_hex[10:18] # 4 bytes data
+            wr_rd_byte = data_hex[18:20] # 1 byte WR/RD
+            response = "NONE"  # No response in TX
+        elif len(data_hex) == 22:  # RX frame (11 bytes)
+            header = data_hex[0:2]
+            address = data_hex[2:10]    # 4 bytes address
+            data_field = data_hex[10:18] # 4 bytes data
+            response_byte = data_hex[18:20] # 1 byte response (pre-last byte)
+            wr_rd_byte = data_hex[20:22] # 1 byte WR/RD (last byte)
+            
+            # Convert response byte to binary and check bits [1:0]
+            try:
+                response_int = int(response_byte, 16)
+                # Extract bits [1:0] (least significant 2 bits)
+                response_bits = response_int & 0b00000011
+                
+                if response_bits == 0b00:
+                    response = "OKAY"
+                elif response_bits == 0b11:
+                    response = "DECERR"
+                else:
+                    response = "ERROR"
+            except ValueError:
+                response = "ERROR"
+        else:
+            return "ERROR", "ERROR", "ERROR", "ERROR", "ERROR"
 
         # Determine WR/RD
-        if codeword[0] == 'a':
+        if wr_rd_byte == 'a1':
             wr_rd = "WR"
-        elif codeword[0] == 'b':
+        elif wr_rd_byte == 'a2':
             wr_rd = "RD"
         else:
             wr_rd = "ERROR"
 
-        # Determine Response
-        if codeword[1] == '0':
-            response = "OKAY"
-        elif codeword[1] == 'f':
-            response = "DECERR"
-        else:
-            response = "ERROR"
+        return header, address, data_field, wr_rd, response
 
-        return header, data, address, wr_rd, response
-
-    def generate_random_frame(slave, header_value, codeword_wr, codeword_rd):
+    def generate_random_frame(slave, header_value, wr_code, rd_code):
         """
-        Generates a random frame for transmission according to the slave's parameters.
-        The last nibble is always 0.
+        Generates a random frame for transmission according to new structure:
+        [1B Header][4B Address][4B Data][1B WR/RD]
         """
+        # Generate random data (4 bytes)
         data = ''.join(random.choices('0123456789abcdef', k=8))
-        # Random address within the given range
+        
+        # Random address within the given range (4 bytes)
         address = f"{random.randint(slave['offset'], slave['offset'] + slave['range']):08x}"
+        
         # Randomly choose between WR and RD codeword
-        codeword = random.choice([codeword_wr, codeword_rd])
-        return f"{header_value}{data}{address}{codeword}"
+        codeword = random.choice([wr_code, rd_code])
+        
+        return f"{header_value}{address}{data}{codeword}"
 
     def process_frames(tx_data_lines):
         """
@@ -70,50 +91,62 @@ with open("rx_data.txt", "w") as file_rx, open("tx_decoded_data.txt", "w") as fi
         tx_count = 0
         rx_count = 0
 
-        # Initialize counters for response types for each slave
+        # Initialize counters
         response_counts_per_slave = [{"OKAY": 0, "DECERR": 0, "ERROR": 0} for _ in slaves]
-        
-        # Initialize total response counts
         total_response_counts = {"OKAY": 0, "DECERR": 0, "ERROR": 0}
+
+        # Clear serial buffer before starting
+        ComPort.reset_input_buffer()
+        ComPort.reset_output_buffer()
 
         for tx_data in tx_data_lines:
             data_hex = tx_data.strip()
             data = bytes.fromhex(data_hex)
             
-            # Transmit data
+            # Transmit ONE frame
             ComPort.write(data)
             print(f"tx frame number: {tx_count}")
             print(f"tx data: {data_hex}")
             
             # Decode the transmitted data
-            header, data_field, address, wr_rd, _ = decode_frame(data_hex)
-            decoded_tx_string = f"{tx_count:<5}|{header:<7}|{data_field:<8}|{address:<8}|{wr_rd:<5}\n"
+            header, address, data_field, wr_rd, _ = decode_frame(data_hex)
+            decoded_tx_string = f"{tx_count:<5}|{header:<7}|{address:<8}|{data_field:<8}|{wr_rd:<5}\n"
             file_tx_decoded.write(decoded_tx_string)
             
-            # Wait for reception of data
+            # Wait for ONE response with longer timeout
             start_time = time.time()
             rx_received = False
-            while time.time() - start_time < 1:
-                if ComPort.in_waiting >= len(data):
-                    # Receive data
-                    x = ComPort.read(size=len(data))
+            expected_rx_length = 22
+            
+            # Ждем полный ответ 2 секунды
+            while time.time() - start_time < 5:
+                if ComPort.in_waiting >= expected_rx_length:
+                    # Receive exactly one frame
+                    x = ComPort.read(size=expected_rx_length)
                     data_hex_rx = x.hex()
+                    
                     print(f"rx frame number: {rx_count}")
                     print(f"rx data: {data_hex_rx}")
                     file_rx.write(data_hex_rx + "\n")
                     
                     # Decode the received data
-                    header, data_field, address, wr_rd, response = decode_frame(data_hex_rx)
-                    decoded_rx_string = f"{rx_count:<5}|{header:<7}|{data_field:<8}|{address:<8}|{wr_rd:<5}|{response:<6}\n"
+                    header_rx, address_rx, data_field_rx, wr_rd_rx, response = decode_frame(data_hex_rx)
+                    decoded_rx_string = f"{rx_count:<5}|{header_rx:<7}|{address_rx:<8}|{data_field_rx:<8}|{wr_rd_rx:<5}|{response:<6}\n"
                     file_rx_decoded.write(decoded_rx_string)
 
-                    # Determine which slave the address belongs to and update response counts
-                    address_int = int(address, 16)
-                    for i, slave in enumerate(slaves):
-                        if slave['offset'] <= address_int < slave['offset'] + slave['range']:
-                            response_counts_per_slave[i][response] += 1
-                            total_response_counts[response] += 1
-                            break
+                    # Update counters
+                    if address_rx != "ERROR":
+                        try:
+                            address_int = int(address_rx, 16)
+                            for i, slave in enumerate(slaves):
+                                if slave['offset'] <= address_int < slave['offset'] + slave['range']:
+                                    response_counts_per_slave[i][response] += 1
+                                    total_response_counts[response] += 1
+                                    break
+                        except ValueError:
+                            total_response_counts["ERROR"] += 1
+                    else:
+                        total_response_counts["ERROR"] += 1
 
                     rx_count += 1
                     rx_received = True
@@ -122,44 +155,35 @@ with open("rx_data.txt", "w") as file_rx, open("tx_decoded_data.txt", "w") as fi
             
             if not rx_received:
                 print(f"rx frame not received for tx frame number: {tx_count}")
-                # Duplicate the transmitted frame as the received frame with "ERROR"
-                file_rx.write(data_hex + "\n")
-                decoded_rx_string = f"{rx_count:<5}|{header:<7}|{data_field:<8}|{address:<8}|ERROR|ERROR\n"
+                decoded_rx_string = f"{rx_count:<5}|{header:<7}|{address:<8}|{data_field:<8}|{wr_rd:<5}|ERROR\n"
                 file_rx_decoded.write(decoded_rx_string)
 
-                # Determine which slave the address belongs to and update response counts
-                address_int = int(address, 16)
-                for i, slave in enumerate(slaves):
-                    if slave['offset'] <= address_int < slave['offset'] + slave['range']:
-                        response_counts_per_slave[i]["ERROR"] += 1
+                if address != "ERROR":
+                    try:
+                        address_int = int(address, 16)
+                        for i, slave in enumerate(slaves):
+                            if slave['offset'] <= address_int < slave['offset'] + slave['range']:
+                                response_counts_per_slave[i]["ERROR"] += 1
+                                total_response_counts["ERROR"] += 1
+                                break
+                    except ValueError:
                         total_response_counts["ERROR"] += 1
-                        break
+                else:
+                    total_response_counts["ERROR"] += 1
 
                 rx_count += 1
             
             tx_count += 1
+            # Убрана задержка между пакетами - ждем ответ перед следующим
 
-        # Check for any remaining data in the buffer after transmission is complete
-        while ComPort.in_waiting > 0:
-            x = ComPort.read(size=ComPort.in_waiting)
+        # После основного цикла проверяем остатки (на всякий случай)
+        remaining_time = time.time() + 3
+        while time.time() < remaining_time and ComPort.in_waiting >= expected_rx_length:
+            x = ComPort.read(size=expected_rx_length)
             data_hex_rx = x.hex()
-            print(f"rx frame number: {rx_count}")
+            print(f"rx frame number: {rx_count} (late)")
             print(f"rx data: {data_hex_rx}")
-            file_rx.write(data_hex_rx + "\n")
-            
-            # Decode the received data
-            header, data_field, address, wr_rd, response = decode_frame(data_hex_rx)
-            decoded_rx_string = f"{rx_count:<5}|{header:<7}|{data_field:<8}|{address:<8}|{wr_rd:<5}|{response:<6}\n"
-            file_rx_decoded.write(decoded_rx_string)
-
-            # Determine which slave the address belongs to and update response counts
-            address_int = int(address, 16)
-            for i, slave in enumerate(slaves):
-                if slave['offset'] <= address_int < slave['offset'] + slave['range']:
-                    response_counts_per_slave[i][response] += 1
-                    total_response_counts[response] += 1
-                    break
-
+            # ... обработка как выше
             rx_count += 1
 
         return response_counts_per_slave, total_response_counts
@@ -177,14 +201,15 @@ with open("rx_data.txt", "w") as file_rx, open("tx_decoded_data.txt", "w") as fi
     
     if mode == 1:
         # User input for a single frame
-        header_value = input("Enter header value: ").strip()
-        data = input("Enter data: ").strip()
-        address = input("Enter address: ").strip()
-        codeword_wr = input("Enter codeword wr: ").strip()
-        codeword_rd = input("Enter codeword rd: ").strip()
+        header_value = input("Enter header value (e.g., f0): ").strip()
+        data = input("Enter data (8 hex chars): ").strip()
+        address = input("Enter address (8 hex chars): ").strip()
+        wr_code = input("Enter WR code (e.g., a1): ").strip()
+        rd_code = input("Enter RD code (e.g., a2): ").strip()
         
-        # Generate frames for WR and RD
-        tx_data_lines = [generate_random_frame(slave, header_value, codeword_wr, codeword_rd) for slave in slaves]
+        # Generate frame manually
+        frame = f"{header_value}{address}{data}{wr_code}"  # Using WR as example
+        tx_data_lines = [frame]
         response_counts_per_slave, total_response_counts = process_frames(tx_data_lines)
         report_data[1]["tx_frames"] = len(tx_data_lines)
         report_data[1]["rx_frames"] = sum(sum(counts.values()) for counts in response_counts_per_slave)
@@ -205,16 +230,13 @@ with open("rx_data.txt", "w") as file_rx, open("tx_decoded_data.txt", "w") as fi
 
     elif mode == 3:
         # Random generation with default parameters
-        num_frames = 128  # Default number of frames
+        num_frames = 4  # Default number of frames
         header_value = "f0"  # Default header value
-        write_code = "a0"  # Default write code
-        read_code = "b0"  # Default read code
-        
-        # Define codeword values based on default parameters
-        codeword_values = [write_code, read_code]
+        wr_code = "a1"  # Default write code
+        rd_code = "a2"  # Default read code
         
         # Generate random data and send it
-        tx_data_lines = [generate_random_frame(random.choice(slaves), header_value, codeword_values[0], codeword_values[1]) for _ in range(num_frames)]
+        tx_data_lines = [generate_random_frame(random.choice(slaves), header_value, wr_code, rd_code) for _ in range(num_frames)]
         response_counts_per_slave, total_response_counts = process_frames(tx_data_lines)
         report_data[3]["tx_frames"] = len(tx_data_lines)
         report_data[3]["rx_frames"] = sum(sum(counts.values()) for counts in response_counts_per_slave)
@@ -223,12 +245,12 @@ with open("rx_data.txt", "w") as file_rx, open("tx_decoded_data.txt", "w") as fi
     elif mode == 4:
         # Random generation with user input parameters
         num_frames = int(input("Enter the number of frames to generate: ").strip())
-        header_value = input("Enter header value: ").strip()
-        codeword_wr = input("Enter codeword wr: ").strip()
-        codeword_rd = input("Enter codeword rd: ").strip()
+        header_value = input("Enter header value (e.g., f0): ").strip()
+        wr_code = input("Enter WR code (e.g., a1): ").strip()
+        rd_code = input("Enter RD code (e.g., a2): ").strip()
         
         # Generate random frames with user-defined parameters
-        tx_data_lines = [generate_random_frame(slave, header_value, codeword_wr, codeword_rd) for _ in range(num_frames) for slave in slaves]
+        tx_data_lines = [generate_random_frame(random.choice(slaves), header_value, wr_code, rd_code) for _ in range(num_frames)]
         response_counts_per_slave, total_response_counts = process_frames(tx_data_lines)
         report_data[4]["tx_frames"] = len(tx_data_lines)
         report_data[4]["rx_frames"] = sum(sum(counts.values()) for counts in response_counts_per_slave)
@@ -237,19 +259,12 @@ with open("rx_data.txt", "w") as file_rx, open("tx_decoded_data.txt", "w") as fi
     # Generate report
     with open("report.txt", "w") as report_file:
         report_file.write(f"Report for Mode {mode}:\n")
-        if mode == 1 or mode == 2:
-            report_file.write("  Total:\n")
-            report_file.write("    Response:\n")
-            for response_type in ["OKAY", "DECERR", "ERROR"]:
-                count = report_data[mode]["total_response_counts"].get(response_type, 0)
-                report_file.write(f"      {response_type}: {count}\n")
-        else:
-            for slave_index, slave in enumerate(slaves):
-                report_file.write(f"  Slave Device {slave_index}:\n")
-                report_file.write("    Response:\n")
-                for response_type in ["OKAY", "DECERR", "ERROR"]:
-                    count = response_counts_per_slave[slave_index].get(response_type, 0)
-                    report_file.write(f"      {response_type}: {count}\n")
+        report_file.write(f"  Transmitted frames: {report_data[mode]['tx_frames']}\n")
+        report_file.write(f"  Received frames: {report_data[mode]['rx_frames']}\n")
+        report_file.write("  Response Summary:\n")
+        for response_type in ["OKAY", "DECERR", "ERROR"]:
+            count = report_data[mode]["total_response_counts"].get(response_type, 0)
+            report_file.write(f"    {response_type}: {count}\n")
 
 # Close serial port
 ComPort.close()
