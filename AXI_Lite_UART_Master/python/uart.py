@@ -10,8 +10,8 @@ def main():
     
     try:
         ComPort = serial.Serial(
-            '/dev/ttyUSB0', 
-            baudrate=115200, 
+            '/dev/ttyACM0', 
+            baudrate=921600, 
             timeout=0.001,
             write_timeout=0.1,
             bytesize=serial.EIGHTBITS,
@@ -108,8 +108,8 @@ def main():
                 
                 return None
 
-            def process_frames_max_speed(tx_data_lines):
-                """Max speed frame processing"""
+            def process_frames_max_speed(tx_data_lines, byte_delay=0.001):
+                """Max speed frame processing with byte delay"""
                 try:
                     tx_count = 0
                     rx_count = 0
@@ -134,7 +134,11 @@ def main():
                             print(f"num_frame: {tx_count}")
                             print(f"tx_frame: {data_hex}")
                             
-                            ComPort.write(data)
+                            for i, byte in enumerate(data):
+                                ComPort.write(bytes([byte]))
+                                ComPort.flush()
+                                if i < len(data) - 1:
+                                    time.sleep(byte_delay)
                             
                         except serial.SerialException:
                             break
